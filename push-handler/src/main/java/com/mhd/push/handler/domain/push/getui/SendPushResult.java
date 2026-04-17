@@ -1,0 +1,39 @@
+package com.mhd.push.handler.domain.push.getui;
+
+
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+/**
+ * 发送消息后的返回值
+ *
+ * @author 3y
+ * https://docs.getui.com/getui/server/rest_v2/common_args/?id=doc-title-1
+ */
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class SendPushResult {
+    /**
+     * msg
+     */
+    @JSONField(name = "msg")
+    private String msg;
+    /**
+     * code
+     */
+    @JSONField(name = "code")
+    private Integer code;
+    /**
+     * data
+     */
+    @JSONField(name = "data")
+    private JSONObject data;
+
+}

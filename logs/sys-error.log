@@ -1,0 +1,64 @@
+2026-04-17 10:36:52 [main] ERROR o.a.r.s.s.RocketMQMessageListenerContainerRegistrar - Started container failed. DefaultRocketMQListenerContainer{consumerGroup='${mhd.mq.rocketmq.consumer.group.recall.recall.consumer.group}', namespace='', namespaceV2='', nameServer='127.0.0.1:9876', topic='austinRecall', consumeMode=CONCURRENTLY, selectorType=TAG, selectorExpression='mhd', messageModel=CLUSTERING', tlsEnable=false, instanceName=DEFAULT}
+java.lang.IllegalStateException: Failed to start RocketMQ push consumer
+	at org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer.start(DefaultRocketMQListenerContainer.java:355)
+	at org.apache.rocketmq.spring.support.RocketMQMessageListenerContainerRegistrar.startContainer(RocketMQMessageListenerContainerRegistrar.java:114)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory$DependencyObjectProvider.ifAvailable(DefaultListableBeanFactory.java:2574)
+	at org.apache.rocketmq.spring.annotation.RocketMQMessageListenerBeanPostProcessor.start(RocketMQMessageListenerBeanPostProcessor.java:150)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
+	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
+	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
+	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1009)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at com.mhd.push.ServerApplication.main(ServerApplication.java:21)
+Caused by: org.apache.rocketmq.client.exception.MQClientException: the specified group[${mhd.mq.rocketmq.consumer.group.recall.recall.consumer.group}] contains illegal characters, allowing only ^[%|a-zA-Z0-9_-]+$
+For more information, please visit the url, https://rocketmq.apache.org/docs/bestPractice/06FAQ
+	at org.apache.rocketmq.client.Validators.checkGroup(Validators.java:56)
+	at org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl.checkConfig(DefaultMQPushConsumerImpl.java:1026)
+	at org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl.start(DefaultMQPushConsumerImpl.java:930)
+	at org.apache.rocketmq.client.consumer.DefaultMQPushConsumer.start(DefaultMQPushConsumer.java:730)
+	at org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer.start(DefaultRocketMQListenerContainer.java:353)
+	... 16 common frames omitted
+2026-04-17 10:37:22 [task-1] ERROR c.m.p.h.config.SensitiveWordsConfig - SensitiveWordConfig#startScheduledUpdate interrupted: sleep interrupted
+2026-04-17 10:37:24 [main] ERROR o.s.boot.SpringApplication - Application run failed
+org.springframework.context.ApplicationContextException: Failed to start bean 'org.apache.rocketmq.spring.annotation.RocketMQMessageListenerBeanPostProcessor'
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:408)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
+	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
+	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
+	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1009)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at com.mhd.push.ServerApplication.main(ServerApplication.java:21)
+Caused by: java.lang.RuntimeException: java.lang.IllegalStateException: Failed to start RocketMQ push consumer
+	at org.apache.rocketmq.spring.support.RocketMQMessageListenerContainerRegistrar.startContainer(RocketMQMessageListenerContainerRegistrar.java:117)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory$DependencyObjectProvider.ifAvailable(DefaultListableBeanFactory.java:2574)
+	at org.apache.rocketmq.spring.annotation.RocketMQMessageListenerBeanPostProcessor.start(RocketMQMessageListenerBeanPostProcessor.java:150)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
+	... 12 common frames omitted
+Caused by: java.lang.IllegalStateException: Failed to start RocketMQ push consumer
+	at org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer.start(DefaultRocketMQListenerContainer.java:355)
+	at org.apache.rocketmq.spring.support.RocketMQMessageListenerContainerRegistrar.startContainer(RocketMQMessageListenerContainerRegistrar.java:114)
+	... 15 common frames omitted
+Caused by: org.apache.rocketmq.client.exception.MQClientException: the specified group[${mhd.mq.rocketmq.consumer.group.recall.recall.consumer.group}] contains illegal characters, allowing only ^[%|a-zA-Z0-9_-]+$
+For more information, please visit the url, https://rocketmq.apache.org/docs/bestPractice/06FAQ
+	at org.apache.rocketmq.client.Validators.checkGroup(Validators.java:56)
+	at org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl.checkConfig(DefaultMQPushConsumerImpl.java:1026)
+	at org.apache.rocketmq.client.impl.consumer.DefaultMQPushConsumerImpl.start(DefaultMQPushConsumerImpl.java:930)
+	at org.apache.rocketmq.client.consumer.DefaultMQPushConsumer.start(DefaultMQPushConsumer.java:730)
+	at org.apache.rocketmq.spring.support.DefaultRocketMQListenerContainer.start(DefaultRocketMQListenerContainer.java:353)
+	... 16 common frames omitted
+2026-04-17 10:38:30 [task-1] ERROR c.m.p.h.config.SensitiveWordsConfig - SensitiveWordConfig#startScheduledUpdate interrupted: sleep interrupted
+2026-04-17 11:39:31 [dtp-1] ERROR c.m.p.h.h.impl.FeiShuRobotHandler - FeiShuRobotHandler#handler fail! result:5,params:{"bizId":"lhTrAwpnQSuIQntKJ40Xg","businessId":2000000120260417,"contentModel":{"content":"你好","sendType":"text"},"idType":0,"messageId":"lhTrAwpnQSuIQntKJ40Xg","messageTemplateId":1,"msgType":10,"receiver":["1"],"sendAccount":1,"sendChannel":110,"shieldType":10,"templateType":20}
+2026-04-17 14:02:46 [dtp-1] ERROR c.m.p.h.h.impl.FeiShuRobotHandler - FeiShuRobotHandler#handler fail! result:45,params:{"bizId":"oKMwE_PEPNJaHsDmSSEe1","businessId":2000000120260417,"contentModel":{"content":"你好违法犯罪","sendType":"text"},"idType":0,"messageId":"oKMwE_PEPNJaHsDmSSEe1","messageTemplateId":1,"msgType":10,"receiver":["1"],"sendAccount":1,"sendChannel":110,"shieldType":10,"templateType":20}
