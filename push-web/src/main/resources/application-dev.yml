@@ -101,8 +101,15 @@ mhd:
       send:
         max-attempts: 3
         backoff-ms: 200
+      consume:
+        max-reconsume-times: 3
+    dlq:
+      record-ttl-hours: 168
+      callback:
+        enabled: false
     topic:
       send: austinBusiness
+      send-orderly: austinBusinessOrderly
       recall: austinRecall
       log: austinTraceLog
     tagId:
@@ -110,12 +117,17 @@ mhd:
     rocketmq:
       orderly:
         enabled: false
-        # bizId | template | channel
-        key-mode: bizId
+        # 仅命中的业务方走有序topic（逗号分隔）
+        business-owners: order-center
       consumer:
         group:
           send: unique-biz-consumer-group
+          send-orderly: unique-biz-orderly-consumer-group
           recall: unique-recall-consumer-group
+  idempotency:
+    enabled: true
+    lock-ttl-seconds: 10
+    result-ttl-seconds: 300
   nacos:
     # 是否开启拉取nacos配置
     enable: false

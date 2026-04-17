@@ -29,6 +29,11 @@ public class BatchSendRequest {
     private Long messageTemplateId;
 
     /**
+     * 幂等键（建议由调用方生成唯一值）
+     */
+    private String idempotencyKey;
+
+    /**
      * 消息相关的参数
      * 必传
      */

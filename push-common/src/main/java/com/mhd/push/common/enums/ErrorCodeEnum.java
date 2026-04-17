@@ -32,7 +32,10 @@ public enum ErrorCodeEnum {
     TEMPLATE_NOT_FOUND("A0002", "找不到模板或模板已被删除"),
     TOO_MANY_RECEIVER("A0003", "传入的接收者大于100个"),
     NO_LOGIN("A0005", "还未登录，请先登录"),
-    MESSAGE_PAYLOAD_TOO_LARGE("A0006", "消息体过大，请将大文件内容上传至对象存储后传URL"),
+    MESSAGE_PAYLOAD_TOO_LARGE("A0006", "消息体过大，请将大文件上传到对象存储后传URL"),
+    DUPLICATE_REQUEST("A0007", "重复请求，请勿重复提交"),
+    REQUEST_IN_PROGRESS("A0008", "请求处理中，请稍后重试"),
+    DLQ_RECORD_NOT_FOUND("A0009", "未找到对应的DLQ记录"),
 
     /**
      * 系统

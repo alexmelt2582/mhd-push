@@ -29,6 +29,8 @@ public class SendServiceImpl implements SendService {
     @Autowired
     @Qualifier("apiProcessController")
     private ProcessController processController;
+    @Autowired
+    private RequestIdempotencyService requestIdempotencyService;
 
     //@Override
     //public BaseResponse<String> send(SendRequest sendRequest) {
@@ -84,20 +86,34 @@ public class SendServiceImpl implements SendService {
             return new SendResponse(ErrorCodeEnum.CLIENT_BAD_PARAMETERS.getCode(), ErrorCodeEnum.CLIENT_BAD_PARAMETERS.getMessage(), null);
         }
 
-        SendTaskModel sendTaskModel = SendTaskModel.builder()
-                .messageTemplateId(sendRequest.getMessageTemplateId())
-                .messageParamList(Collections.singletonList(sendRequest.getMessageParam()))
-                .build();
+        String idempotencyKey = ObjectUtils.isEmpty(sendRequest.getIdempotencyKey())
+                ? requestIdempotencyService.buildRequestFingerprint("send", sendRequest)
+                : sendRequest.getIdempotencyKey();
+        SendResponse hitResponse = requestIdempotencyService.preCheck(idempotencyKey);
+        if (hitResponse != null) {
+            return hitResponse;
+        }
 
-        ProcessContext context = ProcessContext.builder()
-                .code(sendRequest.getCode())
-                .processModel(sendTaskModel)
-                .needBreak(false)
-                .response(BasicResultVO.success()).build();
+        try {
+            SendTaskModel sendTaskModel = SendTaskModel.builder()
+                    .messageTemplateId(sendRequest.getMessageTemplateId())
+                    .messageParamList(Collections.singletonList(sendRequest.getMessageParam()))
+                    .build();
 
-        ProcessContext process = processController.process(context);
+            ProcessContext context = ProcessContext.builder()
+                    .code(sendRequest.getCode())
+                    .processModel(sendTaskModel)
+                    .needBreak(false)
+                    .response(BasicResultVO.success()).build();
 
-        return new SendResponse(process.getResponse().getStatus(), process.getResponse().getMsg(), (List<SimpleTaskInfo>) process.getResponse().getData());
+            ProcessContext process = processController.process(context);
+            SendResponse response = new SendResponse(process.getResponse().getStatus(), process.getResponse().getMsg(), (List<SimpleTaskInfo>) process.getResponse().getData());
+            requestIdempotencyService.onSuccess(idempotencyKey, response);
+            return response;
+        } catch (Exception e) {
+            requestIdempotencyService.onFail(idempotencyKey);
+            throw e;
+        }
     }
 
     @Override
@@ -107,19 +123,33 @@ public class SendServiceImpl implements SendService {
             return new SendResponse(ErrorCodeEnum.CLIENT_BAD_PARAMETERS.getCode(), ErrorCodeEnum.CLIENT_BAD_PARAMETERS.getMessage(), null);
         }
 
-        SendTaskModel sendTaskModel = SendTaskModel.builder()
-                .messageTemplateId(batchSendRequest.getMessageTemplateId())
-                .messageParamList(batchSendRequest.getMessageParamList())
-                .build();
+        String idempotencyKey = ObjectUtils.isEmpty(batchSendRequest.getIdempotencyKey())
+                ? requestIdempotencyService.buildRequestFingerprint("batchSend", batchSendRequest)
+                : batchSendRequest.getIdempotencyKey();
+        SendResponse hitResponse = requestIdempotencyService.preCheck(idempotencyKey);
+        if (hitResponse != null) {
+            return hitResponse;
+        }
 
-        ProcessContext context = ProcessContext.builder()
-                .code(batchSendRequest.getCode())
-                .processModel(sendTaskModel)
-                .needBreak(false)
-                .response(BasicResultVO.success()).build();
+        try {
+            SendTaskModel sendTaskModel = SendTaskModel.builder()
+                    .messageTemplateId(batchSendRequest.getMessageTemplateId())
+                    .messageParamList(batchSendRequest.getMessageParamList())
+                    .build();
 
-        ProcessContext process = processController.process(context);
+            ProcessContext context = ProcessContext.builder()
+                    .code(batchSendRequest.getCode())
+                    .processModel(sendTaskModel)
+                    .needBreak(false)
+                    .response(BasicResultVO.success()).build();
 
-        return new SendResponse(process.getResponse().getStatus(), process.getResponse().getMsg(), (List<SimpleTaskInfo>) process.getResponse().getData());
+            ProcessContext process = processController.process(context);
+            SendResponse response = new SendResponse(process.getResponse().getStatus(), process.getResponse().getMsg(), (List<SimpleTaskInfo>) process.getResponse().getData());
+            requestIdempotencyService.onSuccess(idempotencyKey, response);
+            return response;
+        } catch (Exception e) {
+            requestIdempotencyService.onFail(idempotencyKey);
+            throw e;
+        }
     }
 }

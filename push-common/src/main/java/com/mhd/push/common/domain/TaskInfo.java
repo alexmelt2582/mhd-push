@@ -85,4 +85,19 @@ public class TaskInfo implements Serializable, ProcessModel {
      * 发送账号（邮件下可有多个发送账号、短信可有多个发送账号..）
      */
     private Integer sendAccount;
+
+    /**
+     * 业务方标识（用于按业务方控制有序策略）
+     */
+    private String businessOwner;
+
+    /**
+     * DLQ回访地址（最终重试失败后可回调）
+     */
+    private String dlqCallbackUrl;
+
+    /**
+     * 顺序键（同一键内严格有序）
+     */
+    private String orderKey;
 }

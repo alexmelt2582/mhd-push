@@ -39,6 +39,9 @@ import java.util.*;
 public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
 
     private static final String LINK_NAME = "url";
+    private static final String EXTRA_BUSINESS_OWNER = "businessOwner";
+    private static final String EXTRA_DLQ_CALLBACK_URL = "dlqCallbackUrl";
+    private static final String EXTRA_ORDER_KEY = "orderKey";
 
     @Resource
     private MessageTemplateMapper messageTemplateMapper;
@@ -104,6 +107,7 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
         List<MessageParam> messageParamList = sendTaskModel.getMessageParamList();
         List<TaskInfo> taskInfoList = new ArrayList<>();
         for (MessageParam messageParam : messageParamList) {
+            Map<String, String> extra = Optional.ofNullable(messageParam.getExtra()).orElse(Collections.emptyMap());
             TaskInfo taskInfo = TaskInfo.builder()
                     .messageId(TaskInfoUtils.generateMessageId())
                     .bizId(messageParam.getBizId())
@@ -116,6 +120,9 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
                     .msgType(messageTemplate.getMsgType())
                     .shieldType(messageTemplate.getShieldType())
                     .sendAccount(messageTemplate.getSendAccount())
+                    .businessOwner(extra.get(EXTRA_BUSINESS_OWNER))
+                    .dlqCallbackUrl(extra.get(EXTRA_DLQ_CALLBACK_URL))
+                    .orderKey(extra.get(EXTRA_ORDER_KEY))
                     .contentModel(getContentModelValue(messageTemplate, messageParam)).build();
             if (CharSequenceUtil.isBlank(taskInfo.getBizId())) {
                 taskInfo.setBizId(taskInfo.getMessageId());

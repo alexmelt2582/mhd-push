@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 1. 将消息发送到MQ
@@ -33,14 +36,16 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
     private SendMqService sendMqService;
     @Value("${mhd.mq.topic.send}")
     private String sendMessageTopic;
+    @Value("${mhd.mq.topic.send-orderly}")
+    private String orderlySendMessageTopic;
     @Value("${mhd.mq.tagId.value}")
     private String tagId;
     @Value("${mhd.mq.pipeline}")
     private String mqPipeline;
     @Value("${mhd.mq.rocketmq.orderly.enabled:false}")
     private boolean orderlyEnabled;
-    @Value("${mhd.mq.rocketmq.orderly.key-mode:bizId}")
-    private String orderlyKeyMode;
+    @Value("${mhd.mq.rocketmq.orderly.business-owners:}")
+    private String orderlyBusinessOwners;
     @Value("${mhd.mq.retry.send.max-attempts:3}")
     private int maxSendAttempts;
     @Value("${mhd.mq.retry.send.backoff-ms:200}")
@@ -61,11 +66,13 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
             }
 
             TaskInfo firstTaskInfo = CollUtil.getFirst(taskInfo.listIterator());
-            String orderKey = buildOrderKey(firstTaskInfo);
+            boolean useOrderly = shouldUseOrderly(firstTaskInfo);
+            String orderKey = useOrderly ? buildOrderKey(firstTaskInfo) : null;
+            String topic = useOrderly ? orderlySendMessageTopic : sendMessageTopic;
             int attempts = Math.max(maxSendAttempts, 1);
             for (int i = 1; i <= attempts; i++) {
                 try {
-                    sendMqService.send(sendMessageTopic, message, tagId, orderKey);
+                    sendMqService.send(topic, message, tagId, orderKey);
                     return;
                 } catch (Exception ex) {
                     if (i >= attempts) {
@@ -88,19 +95,47 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
         }
     }
 
-    private String buildOrderKey(TaskInfo taskInfo) {
+    private boolean shouldUseOrderly(TaskInfo taskInfo) {
         if (!orderlyEnabled || taskInfo == null) {
+            return false;
+        }
+        if (taskInfo.getBizId() == null || taskInfo.getBizId().isBlank()) {
+            return false;
+        }
+        String owner = taskInfo.getBusinessOwner();
+        if (owner == null || owner.isBlank()) {
+            return false;
+        }
+        Set<String> ownerSet = parseBusinessOwners(orderlyBusinessOwners);
+        return ownerSet.contains(owner);
+    }
+
+    private String buildOrderKey(TaskInfo taskInfo) {
+        if (taskInfo == null) {
             return null;
         }
-        if ("template".equalsIgnoreCase(orderlyKeyMode)) {
-            return String.valueOf(taskInfo.getMessageTemplateId());
+        if (taskInfo.getOrderKey() != null && !taskInfo.getOrderKey().isBlank()) {
+            return taskInfo.getOrderKey();
         }
-        if ("channel".equalsIgnoreCase(orderlyKeyMode)) {
-            return String.valueOf(taskInfo.getSendChannel());
+        if (taskInfo.getBusinessOwner() != null && !taskInfo.getBusinessOwner().isBlank()
+                && taskInfo.getBizId() != null && !taskInfo.getBizId().isBlank()) {
+            return taskInfo.getBusinessOwner() + ":" + taskInfo.getBizId();
         }
         if (taskInfo.getBizId() != null && !taskInfo.getBizId().isBlank()) {
             return taskInfo.getBizId();
         }
         return taskInfo.getMessageId();
+    }
+
+    private Set<String> parseBusinessOwners(String config) {
+        if (config == null || config.isBlank()) {
+            return new HashSet<>();
+        }
+        Set<String> owners = new HashSet<>();
+        Arrays.stream(config.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .forEach(owners::add);
+        return owners;
     }
 }

@@ -5,6 +5,7 @@ import com.mhd.push.support.constants.MessageQueuePipeline;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.annotation.SelectorType;
 import org.apache.rocketmq.spring.core.RocketMQListener;
@@ -12,22 +13,23 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * 普通并发消费通道（非有序业务默认走这里）
+ * 有序消费通道（仅业务方白名单命中时才会投递到该topic）
  */
 @Slf4j
 @Component
 @ConditionalOnProperty(name = "mhd.mq.pipeline", havingValue = MessageQueuePipeline.ROCKET_MQ)
-@RocketMQMessageListener(topic = "${mhd.mq.topic.send}",
-        consumerGroup = "${mhd.mq.rocketmq.consumer.group.send}",
+@RocketMQMessageListener(topic = "${mhd.mq.topic.send-orderly}",
+        consumerGroup = "${mhd.mq.rocketmq.consumer.group.send-orderly}",
         selectorType = SelectorType.TAG,
-        selectorExpression = "${mhd.mq.tagId.value}")
-public class RocketMqBizReceiver implements RocketMQListener<MessageExt>, MessageReceiver {
+        selectorExpression = "${mhd.mq.tagId.value}",
+        consumeMode = ConsumeMode.ORDERLY)
+public class RocketMqOrderlyBizReceiver implements RocketMQListener<MessageExt>, MessageReceiver {
 
     @Resource
     private RocketMqConsumeService rocketMqConsumeService;
 
     @Override
     public void onMessage(MessageExt messageExt) {
-        rocketMqConsumeService.consume(messageExt, false);
+        rocketMqConsumeService.consume(messageExt, true);
     }
 }
