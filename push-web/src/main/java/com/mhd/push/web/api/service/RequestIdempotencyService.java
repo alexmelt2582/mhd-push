@@ -1,7 +1,7 @@
 package com.mhd.push.web.api.service;
 
 import com.alibaba.fastjson2.JSON;
-import com.mhd.push.common.constant.MqRedisConstant;
+import com.mhd.push.common.constant.RedisConstant;
 import com.mhd.push.common.enums.ErrorCodeEnum;
 import com.mhd.push.web.api.domain.SendResponse;
 import jakarta.annotation.Resource;
@@ -38,12 +38,12 @@ public class RequestIdempotencyService {
         if (!enabled) {
             return null;
         }
-        String result = stringRedisTemplate.opsForValue().get(getResultKey(idempotencyKey));
+        String result = stringRedisTemplate.opsForValue().get(RedisConstant.buildIdempotencyResultKey(idempotencyKey));
         if (result != null) {
             return JSON.parseObject(result, SendResponse.class);
         }
 
-        Boolean locked = stringRedisTemplate.opsForValue().setIfAbsent(getLockKey(idempotencyKey), "1", lockTtlSeconds, TimeUnit.SECONDS);
+        Boolean locked = stringRedisTemplate.opsForValue().setIfAbsent(RedisConstant.buildIdempotencyLockKey(idempotencyKey), "1", lockTtlSeconds, TimeUnit.SECONDS);
         if (Boolean.FALSE.equals(locked)) {
             return new SendResponse(ErrorCodeEnum.REQUEST_IN_PROGRESS.getCode(), ErrorCodeEnum.REQUEST_IN_PROGRESS.getMessage(), null);
         }
@@ -54,22 +54,14 @@ public class RequestIdempotencyService {
         if (!enabled) {
             return;
         }
-        stringRedisTemplate.opsForValue().set(getResultKey(idempotencyKey), JSON.toJSONString(response), resultTtlSeconds, TimeUnit.SECONDS);
-        stringRedisTemplate.delete(getLockKey(idempotencyKey));
+        stringRedisTemplate.opsForValue().set(RedisConstant.buildIdempotencyResultKey(idempotencyKey), JSON.toJSONString(response), resultTtlSeconds, TimeUnit.SECONDS);
+        stringRedisTemplate.delete(RedisConstant.buildIdempotencyLockKey(idempotencyKey));
     }
 
     public void onFail(String idempotencyKey) {
         if (!enabled) {
             return;
         }
-        stringRedisTemplate.delete(getLockKey(idempotencyKey));
-    }
-
-    private String getResultKey(String idempotencyKey) {
-        return MqRedisConstant.IDEMPOTENCY_RESULT_KEY_PREFIX + idempotencyKey;
-    }
-
-    private String getLockKey(String idempotencyKey) {
-        return MqRedisConstant.IDEMPOTENCY_LOCK_KEY_PREFIX + idempotencyKey;
+        stringRedisTemplate.delete(RedisConstant.buildIdempotencyLockKey(idempotencyKey));
     }
 }

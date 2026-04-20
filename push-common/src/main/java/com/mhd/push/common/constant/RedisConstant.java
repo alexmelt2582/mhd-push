@@ -38,6 +38,17 @@ public interface RedisConstant {
         return MESSAGE_TEMPLATE_CACHE_VERSION_KEY_PREFIX + templateId;
     }
 
+    String IDEMPOTENCY_RESULT_KEY_PREFIX = GLOBAL_PREFIX + "api:idempotency:result:";
+    String IDEMPOTENCY_LOCK_KEY_PREFIX = GLOBAL_PREFIX + "api:idempotency:lock:";
+
+    static String buildIdempotencyResultKey(String key) {
+        return IDEMPOTENCY_RESULT_KEY_PREFIX + key;
+    }
+
+    static String buildIdempotencyLockKey(String key) {
+        return IDEMPOTENCY_LOCK_KEY_PREFIX + key;
+    }
+
     /**
      * 内容去重Key前缀
      */
@@ -65,4 +76,26 @@ public interface RedisConstant {
     static String buildDeduplicationOfFrequencyKey(String key) {
         return DEDUPLICATION_FREQUENCY_KEY_PREFIX + key;
     }
+
+    /**
+     * 死信队列记录Key前缀
+     */
+    String DLQ_RECORD_KEY_PREFIX = GLOBAL_PREFIX + "dlq:record:";
+    String DLQ_INDEX_KEY = GLOBAL_PREFIX + "dlq:index";
+    String DLQ_ALERT_THROTTLE_KEY_PREFIX = GLOBAL_PREFIX + "dlq:alert:throttle:";
+
+    /**
+     * 构建完整的死信队列记录 Key
+     * @param key 去重 Key
+     * @return 完整的频次去重 Key
+     */
+    static String buildDlqRecordKey(String key) {
+        return DLQ_RECORD_KEY_PREFIX + key;
+    }
+
+    static String buildDlqAlertThrottleKey(String key) {
+        return DLQ_ALERT_THROTTLE_KEY_PREFIX + key;
+    }
+
+
 }
