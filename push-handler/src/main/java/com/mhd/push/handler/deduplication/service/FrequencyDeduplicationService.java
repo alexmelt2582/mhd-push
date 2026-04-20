@@ -52,7 +52,7 @@ public class FrequencyDeduplicationService extends AbstractDeduplicationService 
         }
         deduplicationParam.setTaskInfo(taskInfo);
         deduplicationParam.setDeduplicationTime((DateUtil.endOfDay(new Date()).getTime() - DateUtil.current()) / 1000);
-        deduplicationParam.setMsgPushState(MsgPushState.CONTENT_DEDUPLICATION);
+        deduplicationParam.setMsgPushState(MsgPushState.RULE_DEDUPLICATION);
         return deduplicationParam;
     }
 
