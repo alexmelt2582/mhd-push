@@ -1,14 +1,11 @@
 package com.mhd.push.handler.deduplication.service;
 
 import cn.hutool.core.collection.CollUtil;
-import com.mhd.push.common.domain.AnchorInfo;
 import com.mhd.push.common.domain.MsgPushLogRequest;
 import com.mhd.push.common.domain.TaskInfo;
-import com.mhd.push.common.enums.MsgPushState;
 import com.mhd.push.common.enums.MsgPushTypeEnum;
 import com.mhd.push.handler.deduplication.DeduplicationHolder;
 import com.mhd.push.handler.deduplication.DeduplicationParam;
-import com.mhd.push.handler.deduplication.limit.LimitService;
 import com.mhd.push.support.utils.LogUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +18,7 @@ import java.util.Set;
  */
 @Slf4j
 public abstract class AbstractDeduplicationService implements DeduplicationService {
-    protected Integer deduplicationType;
-
-    protected LimitService limitService;
+    protected String DEDUPLICATION_CONFIG_PRE = "deduplication_";
 
     @Resource
     private DeduplicationHolder deduplicationHolder;
@@ -32,14 +27,14 @@ public abstract class AbstractDeduplicationService implements DeduplicationServi
 
     @PostConstruct
     private void init() {
-        deduplicationHolder.putService(deduplicationType, this);
+        deduplicationHolder.putService(getDeduplicationType(), this);
     }
 
     @Override
     public void deduplication(DeduplicationParam param) {
         TaskInfo taskInfo = param.getTaskInfo();
 
-        Set<String> filterReceiver = limitService.limitFilter(this, taskInfo, param);
+        Set<String> filterReceiver = limitFilter(taskInfo, param);
 
         // 剔除符合去重条件的用户
         if (CollUtil.isNotEmpty(filterReceiver)) {
@@ -61,4 +56,13 @@ public abstract class AbstractDeduplicationService implements DeduplicationServi
      * 构建去重的Key
      */
     public abstract String deduplicationSingleKey(TaskInfo taskInfo, String receiver);
+
+    /**
+     * 去重限制
+     *
+     * @param taskInfo 任务
+     * @param param    去重参数
+     * @return 返回不符合条件
+     */
+    public abstract Set<String> limitFilter(TaskInfo taskInfo, DeduplicationParam param);
 }

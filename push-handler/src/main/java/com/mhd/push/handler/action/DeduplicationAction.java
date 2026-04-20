@@ -9,6 +9,7 @@ import com.mhd.push.common.pipeline.BusinessProcess;
 import com.mhd.push.common.pipeline.ProcessContext;
 import com.mhd.push.handler.deduplication.DeduplicationHolder;
 import com.mhd.push.handler.deduplication.DeduplicationParam;
+import com.mhd.push.handler.deduplication.service.DeduplicationService;
 import com.mhd.push.support.service.ConfigService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -36,20 +37,30 @@ public class DeduplicationAction implements BusinessProcess<TaskInfo> {
     public void process(ProcessContext<TaskInfo> context) {
         TaskInfo taskInfo = context.getProcessModel();
 
-        // 配置样例{"deduplication_10":{"num":1,"time":300},"deduplication_20":{"num":5}}
+        // 配置样例：{"deduplication_10":{"num":1,"time":300},"deduplication_20":{"num":5}}
+        // 从配置中心读取整段去重配置。
         String deduplicationConfig = configService.getProperty(DEDUPLICATION_RULE_KEY, CommonConstant.EMPTY_JSON_OBJECT);
-
-        // 去重
-        List<Integer> deduplicationList = EnumUtil.getCodeList(DeduplicationType.class);
-        for (Integer deduplicationType : deduplicationList) {
-            DeduplicationParam deduplicationParam = deduplicationHolder.selectBuilder(deduplicationType).build(deduplicationConfig, taskInfo);
-            if (Objects.nonNull(deduplicationParam)) {
-                deduplicationHolder.selectService(deduplicationType).deduplication(deduplicationParam);
-            }
-        }
+        applyConfiguredDeduplicationRules(taskInfo, deduplicationConfig);
 
         if (CollUtil.isEmpty(taskInfo.getReceiver())) {
             context.setNeedBreak(true);
+        }
+    }
+
+    /**
+     * 按去重类型顺:
+     */
+    private void applyConfiguredDeduplicationRules(TaskInfo taskInfo, String deduplicationConfig) {
+        List<Integer> deduplicationTypes = EnumUtil.getCodeList(DeduplicationType.class);
+        for (Integer deduplicationType : deduplicationTypes) {
+            DeduplicationService deduplicationService = deduplicationHolder.selectService(deduplicationType);
+            if (Objects.isNull(deduplicationService)) {
+                continue;
+            }
+            DeduplicationParam param = deduplicationService.build(deduplicationConfig, taskInfo);
+            if (Objects.nonNull(param)) {
+                deduplicationService.deduplication(param);
+            }
         }
     }
 }
