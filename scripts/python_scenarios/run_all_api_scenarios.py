@@ -22,6 +22,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scenario_common import create_parser
+
 
 def run_script(script_path: Path, args: list[str]) -> None:
     """执行单个 Python 场景脚本。"""
@@ -31,11 +33,18 @@ def run_script(script_path: Path, args: list[str]) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="所有 Python API 场景总控脚本")
+    parser = create_parser("所有 Python API 场景总控脚本")
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
-    parser.add_argument("--template-id", required=True, type=int)
-    parser.add_argument("--send-account", required=True, type=int)
     parser.add_argument("--receiver", required=True)
+    parser.add_argument("--send-channel", default=40, type=int)
+    parser.add_argument("--id-type", default=50, type=int)
+    parser.add_argument("--template-type", default=20, type=int)
+    parser.add_argument("--msg-type", default=10, type=int)
+    parser.add_argument("--shield-type", default=10, type=int)
+    parser.add_argument("--account-config")
+    parser.add_argument("--account-config-override", action="append", default=[])
+    parser.add_argument("--template-content")
+    parser.add_argument("--template-content-override", action="append", default=[])
     parser.add_argument("--include-mq-failure", action="store_true")
     parser.add_argument("--rocketmq-script-dir", default="./doc/rocketmq")
     parser.add_argument("--large-payload-bytes", default=3300000, type=int)
@@ -44,15 +53,28 @@ def main() -> int:
     root = Path(__file__).resolve().parent
     common_args = [
         "--base-url", args.base_url,
-        "--template-id", str(args.template_id),
-        "--send-account", str(args.send_account),
         "--receiver", args.receiver,
+        "--send-channel", str(args.send_channel),
+        "--id-type", str(args.id_type),
+        "--template-type", str(args.template_type),
+        "--msg-type", str(args.msg_type),
+        "--shield-type", str(args.shield_type),
     ]
+    if args.account_config:
+        common_args.extend(["--account-config", args.account_config])
+    for override_expression in args.account_config_override:
+        common_args.extend(["--account-config-override", override_expression])
+    if args.template_content:
+        common_args.extend(["--template-content", args.template_content])
+    for override_expression in args.template_content_override:
+        common_args.extend(["--template-content-override", override_expression])
 
     run_script(root / "scenario_s1_ordered.py", common_args)
     run_script(root / "scenario_s3_unordered.py", common_args)
     run_script(root / "scenario_s11_idempotency.py", common_args)
+    run_script(root / "scenario_s12_template_cache.py", common_args)
     run_script(root / "scenario_s13_payload.py", common_args + ["--large-payload-bytes", str(args.large_payload_bytes)])
+    run_script(root / "scenario_s14_hotspot_acceptance.py", common_args)
     run_script(root / "scenario_s9_dlq_compensate.py", ["--base-url", args.base_url])
 
     if args.include_mq_failure:

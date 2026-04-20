@@ -20,6 +20,8 @@ import sys
 import urllib.error
 import urllib.request
 
+from scenario_common import create_parser
+
 
 def http_get_json(url: str) -> dict:
     with urllib.request.urlopen(urllib.request.Request(url=url, method="GET"), timeout=10) as response:
@@ -38,7 +40,7 @@ def http_post_json(url: str, payload: dict) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="S9 DLQ 人工补偿脚本")
+    parser = create_parser("S9 DLQ 人工补偿脚本")
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
     args = parser.parse_args()
 
