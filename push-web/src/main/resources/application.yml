@@ -24,7 +24,7 @@ server:
 # 日志配置
 logging:
   level:
-    com.mhd: debug
+    com.mhd: info
     org.springframework: warn
     org.mybatis.spring.mapper: error
   config: classpath:logback-spring.xml
@@ -126,3 +126,49 @@ springdoc:
   api-docs:
     path: /v3/api-docs
     enabled: true
+
+mhd:
+  mq:
+    payload:
+      max-size-bytes: 3145728
+    retry:
+      send:
+        max-attempts: 3
+        backoff-ms: 200
+      consume:
+        max-reconsume-times: 3
+    dlq:
+      record-ttl-hours: 168
+      alert:
+        enabled: false
+        throttle-seconds: 300
+        subject-prefix: "[MHD-DLQ]"
+        mail:
+          host: ""
+          port: 25
+          user: ""
+          pass: ""
+          from: ""
+          to: ""
+          ssl-enable: false
+          starttls-enable: false
+    topic:
+      send-orderly: austinBusinessOrderly
+    rocketmq:
+      orderly:
+        enabled: false
+        business-owners: order-center
+  idempotency:
+    enabled: true
+    lock-ttl-seconds: 10
+    result-ttl-seconds: 300
+  handler:
+    retry:
+      max-attempts: 3
+      backoff-ms: 200
+    delivery:
+      sending-ttl-seconds: 86400
+      success-ttl-seconds: 604800
+      fail-ttl-seconds: 3600
+      pending-confirm-ttl-seconds: 604800
+      pending-confirm-after-ms: 30000

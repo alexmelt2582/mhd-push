@@ -1,8 +1,7 @@
 package com.mhd.push.handler.receiver.rocketmq;
 
-import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson2.JSON;
-import com.mhd.push.common.constant.MqRedisConstant;
+import com.mhd.push.common.constant.RedisConstant;
 import com.mhd.push.common.domain.MqDlqRecord;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.handler.receiver.service.ConsumeService;
@@ -11,6 +10,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * RocketMQ 消费公共逻辑：消费状态、重试失败落DLQ记录、回访
+ * RocketMQ 消费公共逻辑：消费状态、重试失败落DLQ记录、内部告警
  */
 @Slf4j
 @Service
@@ -41,8 +41,8 @@ public class RocketMqConsumeService {
     private String sendTopic;
     @Value("${mhd.mq.topic.send-orderly}")
     private String sendOrderlyTopic;
-    @Value("${mhd.mq.dlq.callback.enabled:false}")
-    private boolean dlqCallbackEnabled;
+    @Autowired(required = false)
+    private DlqAlertService dlqAlertService;
 
     public void consume(MessageExt messageExt, boolean orderly) {
         String message = new String(messageExt.getBody(), StandardCharsets.UTF_8);
@@ -55,20 +55,24 @@ public class RocketMqConsumeService {
         }
         log.debug("RocketMqBizReceiver#onMessage topic:{}, size:{}", orderly ? sendOrderlyTopic : sendTopic, taskInfoLists.size());
         try {
-            consumeService.consume2Send(taskInfoLists);
+            if (orderly) {
+                consumeService.consume2SendOrderly(taskInfoLists);
+            } else {
+                consumeService.consume2Send(taskInfoLists);
+            }
         } catch (Exception e) {
             int currentRetry = messageExt.getReconsumeTimes() + 1;
             if (currentRetry >= maxReconsumeTimes) {
-                recordDlq(taskInfoLists, messageExt, message, e, orderly, currentRetry);
-                callbackDlq(taskInfoLists, e, currentRetry);
+                MqDlqRecord record = recordDlq(taskInfoLists, messageExt, message, e, orderly, currentRetry);
+                alertOps(record);
                 log.error("RocketMqBizReceiver#onMessage fail, topic:{}, e:{}", orderly ? sendOrderlyTopic : sendTopic, e.getMessage(), e);
             }
-            throw new RuntimeException(e);
+            log.error("RocketMqBizReceiver#onMessage dispatch fail, topic:{}, e:{}", orderly ? sendOrderlyTopic : sendTopic, e.getMessage(), e);
         }
     }
 
-    private void recordDlq(List<TaskInfo> taskInfoLists, MessageExt messageExt, String payload,
-                           Exception e, boolean orderly, int currentRetry) {
+    private MqDlqRecord recordDlq(List<TaskInfo> taskInfoLists, MessageExt messageExt, String payload,
+                                  Exception e, boolean orderly, int currentRetry) {
         TaskInfo first = taskInfoLists.get(0);
         MqDlqRecord record = MqDlqRecord.builder()
                 .messageId(first.getMessageId())
@@ -85,36 +89,20 @@ public class RocketMqConsumeService {
                 .createdAt(System.currentTimeMillis())
                 .build();
 
-        String recordKey = MqRedisConstant.DLQ_RECORD_KEY_PREFIX + first.getMessageId();
+        String recordKey = RedisConstant.buildDlqRecordKey(first.getMessageId());
         stringRedisTemplate.opsForValue().set(recordKey, JSON.toJSONString(record), dlqRecordTtlHours, TimeUnit.HOURS);
-        stringRedisTemplate.opsForZSet().add(MqRedisConstant.DLQ_INDEX_KEY, first.getMessageId(), System.currentTimeMillis());
+        stringRedisTemplate.opsForZSet().add(RedisConstant.DLQ_INDEX_KEY, first.getMessageId(), System.currentTimeMillis());
+        return record;
     }
 
-    private void callbackDlq(List<TaskInfo> taskInfoLists, Exception e, int currentRetry) {
-        if (!dlqCallbackEnabled || taskInfoLists.isEmpty()) {
-            return;
-        }
-        TaskInfo first = taskInfoLists.get(0);
-        if (StringUtils.isBlank(first.getDlqCallbackUrl())) {
+    private void alertOps(MqDlqRecord record) {
+        if (record == null || dlqAlertService == null) {
             return;
         }
         try {
-            MqDlqRecord callbackBody = MqDlqRecord.builder()
-                    .messageId(first.getMessageId())
-                    .bizId(first.getBizId())
-                    .businessOwner(first.getBusinessOwner())
-                    .reconsumeTimes(currentRetry)
-                    .maxReconsumeTimes(maxReconsumeTimes)
-                    .errorReason(e.getMessage())
-                    .status("PENDING")
-                    .createdAt(System.currentTimeMillis())
-                    .build();
-            HttpRequest.post(first.getDlqCallbackUrl())
-                    .timeout(3000)
-                    .body(JSON.toJSONString(callbackBody))
-                    .execute();
-        } catch (Exception callbackEx) {
-            log.error("DLQ callback fail, messageId:{}, err:{}", first.getMessageId(), callbackEx.getMessage(), callbackEx);
+            dlqAlertService.alert(record);
+        } catch (Exception alertEx) {
+            log.error("DLQ alert fail, messageId:{}, err:{}", record.getMessageId(), alertEx.getMessage(), alertEx);
         }
     }
 }

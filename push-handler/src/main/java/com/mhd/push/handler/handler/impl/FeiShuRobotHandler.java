@@ -3,6 +3,7 @@ package com.mhd.push.handler.handler.impl;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
 import com.mhd.push.common.domain.RecallTaskInfo;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * 飞书自定义机器人 消息处理器
@@ -43,21 +43,25 @@ public class FeiShuRobotHandler extends BaseHandler {
     @Override
     public boolean handler(TaskInfo taskInfo) {
         try {
-            //FeiShuRobotAccount account = accountUtils.getAccountById(taskInfo.getSendAccount(), FeiShuRobotAccount.class);
-            //FeiShuRobotParam feiShuRobotParam = assembleParam(taskInfo);
-            //String result = HttpRequest.post(account.getWebhook())
-            //        .header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
-            //        .body(JSON.toJSONString(feiShuRobotParam))
-            //        .timeout(2000)
-            //        .execute().body();
-            //FeiShuRobotResult feiShuRobotResult = JSON.parseObject(result, FeiShuRobotResult.class);
-            //if (feiShuRobotResult.getStatusCode() == 0) {
-            //    return true;
-            //}
-            int i = new Random().nextInt(100);
-            if(i%2 == 0) return true;
-            //log.error("FeiShuRobotHandler#handler fail! result:{},params:{}", JSON.toJSONString(feiShuRobotResult), JSON.toJSONString(taskInfo));
-            log.error("FeiShuRobotHandler#handler fail! result:{},params:{}", JSON.toJSONString(i), JSON.toJSONString(taskInfo));
+            FeiShuRobotAccount account = accountUtils.getAccountById(taskInfo.getSendAccount(), FeiShuRobotAccount.class);
+            FeiShuRobotParam feiShuRobotParam = assembleParam(taskInfo);
+            HttpResponse response = HttpRequest.post(account.getWebhook())
+                    .header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
+                    .body(JSON.toJSONString(feiShuRobotParam))
+                    .timeout(2000)
+                    .execute();
+            if (response.getStatus() == 429) {
+                recordExternalRateLimitBackoff(taskInfo, 1000L);
+                log.warn("FeiShuRobotHandler#handler throttled, params:{}", JSON.toJSONString(taskInfo));
+                return false;
+            }
+            String result = response.body();
+            FeiShuRobotResult feiShuRobotResult = JSON.parseObject(result, FeiShuRobotResult.class);
+            if ((feiShuRobotResult.getStatusCode() != null && feiShuRobotResult.getStatusCode() == 0)
+                    || (feiShuRobotResult.getCode() != null && feiShuRobotResult.getCode() == 0)) {
+                return true;
+            }
+            log.error("FeiShuRobotHandler#handler fail! result:{},params:{}", JSON.toJSONString(feiShuRobotResult), JSON.toJSONString(taskInfo));
         } catch (Exception e) {
             log.error("FeiShuRobotHandler#handler fail!e:{},params:{}", Throwables.getStackTraceAsString(e), JSON.toJSONString(taskInfo));
         }

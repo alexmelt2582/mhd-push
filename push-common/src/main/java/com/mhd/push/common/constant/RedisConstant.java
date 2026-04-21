@@ -83,6 +83,13 @@ public interface RedisConstant {
     String DLQ_RECORD_KEY_PREFIX = GLOBAL_PREFIX + "dlq:record:";
     String DLQ_INDEX_KEY = GLOBAL_PREFIX + "dlq:index";
     String DLQ_ALERT_THROTTLE_KEY_PREFIX = GLOBAL_PREFIX + "dlq:alert:throttle:";
+    String FLOW_CONTROL_SECOND_KEY_PREFIX = GLOBAL_PREFIX + "flow:second:";
+    String FLOW_CONTROL_MINUTE_KEY_PREFIX = GLOBAL_PREFIX + "flow:minute:";
+    String FLOW_CONTROL_DAY_KEY_PREFIX = GLOBAL_PREFIX + "flow:day:";
+    String FLOW_CONTROL_LEAKY_KEY_PREFIX = GLOBAL_PREFIX + "flow:leaky:";
+    String FLOW_CONTROL_BACKOFF_KEY_PREFIX = GLOBAL_PREFIX + "flow:backoff:";
+    String SEND_EXECUTION_KEY_PREFIX = GLOBAL_PREFIX + "send:execution:";
+    String SEND_PENDING_CONFIRM_INDEX_KEY = GLOBAL_PREFIX + "send:pending_confirm:index";
 
     /**
      * 构建完整的死信队列记录 Key
@@ -95,6 +102,30 @@ public interface RedisConstant {
 
     static String buildDlqAlertThrottleKey(String key) {
         return DLQ_ALERT_THROTTLE_KEY_PREFIX + key;
+    }
+
+    static String buildFlowControlSecondKey(String key, long epochSecond) {
+        return FLOW_CONTROL_SECOND_KEY_PREFIX + key + ":" + epochSecond;
+    }
+
+    static String buildFlowControlMinuteKey(String key, long epochMinute) {
+        return FLOW_CONTROL_MINUTE_KEY_PREFIX + key + ":" + epochMinute;
+    }
+
+    static String buildFlowControlDayKey(String key, long epochDay) {
+        return FLOW_CONTROL_DAY_KEY_PREFIX + key + ":" + epochDay;
+    }
+
+    static String buildFlowControlLeakyKey(String key) {
+        return FLOW_CONTROL_LEAKY_KEY_PREFIX + key;
+    }
+
+    static String buildFlowControlBackoffKey(String key) {
+        return FLOW_CONTROL_BACKOFF_KEY_PREFIX + key;
+    }
+
+    static String buildSendExecutionKey(String key) {
+        return SEND_EXECUTION_KEY_PREFIX + key;
     }
 
 

@@ -20,7 +20,9 @@ import com.mhd.push.support.domain.entity.MessageTemplate;
 import com.mhd.push.support.mapper.MessageTemplateMapper;
 import com.mhd.push.web.domain.dto.MessageTemplateParam;
 import com.mhd.push.web.domain.dto.MessageTemplateSaveDTO;
+import com.mhd.push.web.service.MessageTemplateCacheService;
 import com.mhd.push.web.service.MessageTemplateService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -32,6 +34,9 @@ import java.util.Objects;
  **/
 @Service
 public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplate> implements MessageTemplateService {
+    @Resource
+    private MessageTemplateCacheService messageTemplateCacheService;
+
     @Override
     public IPage<MessageTemplate> selectPageTemplateList(PageParam pageParam, MessageTemplateParam messageTemplateParam) {
         Page<MessageTemplate> page = MybatisPlusUtils.buildPage(pageParam, messageTemplateParam);
@@ -43,7 +48,7 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 
     @Override
     public MessageTemplate selectTemplateById(Long id) {
-        return baseMapper.selectById(id);
+        return messageTemplateCacheService.getTemplate(id);
     }
 
     @Override
@@ -58,7 +63,11 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
                 .setCreated(Math.toIntExact(DateUtil.currentSeconds()))
                 .setIsDeleted(CommonConstant.FALSE)
                 .setUpdated(Math.toIntExact(DateUtil.currentSeconds()));
-        return baseMapper.insert(messageTemplate);
+        int result = baseMapper.insert(messageTemplate);
+        if (result > 0) {
+            messageTemplateCacheService.refresh(messageTemplate);
+        }
+        return result;
     }
 
     @Override
@@ -79,7 +88,11 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
         //    cronTaskService.stopCronTask(messageTemplate.getCronTaskId());
         //}
         messageTemplate.setUpdated(Math.toIntExact(DateUtil.currentSeconds()));
-        return baseMapper.updateById(messageTemplate);
+        int result = baseMapper.updateById(messageTemplate);
+        if (result > 0) {
+            messageTemplateCacheService.refresh(baseMapper.selectById(messageTemplate.getId()));
+        }
+        return result;
     }
 
     @Override
@@ -97,6 +110,7 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
             }
         }
         baseMapper.deleteByIds(ids);
+        ids.forEach(messageTemplateCacheService::evict);
     }
 
     @Override

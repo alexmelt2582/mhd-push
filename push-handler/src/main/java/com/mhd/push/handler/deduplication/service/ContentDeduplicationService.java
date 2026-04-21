@@ -68,7 +68,10 @@ public class ContentDeduplicationService extends AbstractDeduplicationService {
 
     @Override
     public String deduplicationSingleKey(TaskInfo taskInfo, String receiver) {
-        return prefix + DigestUtil.md5Hex(taskInfo.getMessageTemplateId() + receiver
+        // TODO 移除了TemplaId
+        //return prefix + DigestUtil.md5Hex(taskInfo.getMessageTemplateId() + receiver
+        //        + JSON.toJSONString(taskInfo.getContentModel()));
+        return prefix + DigestUtil.md5Hex(receiver
                 + JSON.toJSONString(taskInfo.getContentModel()));
     }
 

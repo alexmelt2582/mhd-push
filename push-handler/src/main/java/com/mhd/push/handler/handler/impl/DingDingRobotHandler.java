@@ -2,7 +2,9 @@ package com.mhd.push.handler.handler.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.StrPool;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.ContentType;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
 import com.mhd.push.common.constant.CommonConstant;
@@ -51,7 +53,17 @@ public class DingDingRobotHandler extends BaseHandler {
         try {
             DingDingRobotAccount account = accountUtils.getAccountById(taskInfo.getSendAccount(), DingDingRobotAccount.class);
             DingDingRobotParam dingDingRobotParam = assembleParam(taskInfo);
-            String httpResult = HttpUtil.post(assembleParamUrl(account), JSON.toJSONString(dingDingRobotParam));
+            HttpResponse response = HttpRequest.post(assembleParamUrl(account))
+                    .contentType(ContentType.JSON.getValue())
+                    .body(JSON.toJSONString(dingDingRobotParam))
+                    .timeout(2000)
+                    .execute();
+            if (response.getStatus() == 429) {
+                recordExternalRateLimitBackoff(taskInfo, 1000L);
+                log.warn("DingDingHandler#handler throttled, params:{}", JSON.toJSONString(taskInfo));
+                return false;
+            }
+            String httpResult = response.body();
             DingDingRobotResult dingDingRobotResult = JSON.parseObject(httpResult, DingDingRobotResult.class);
             if (dingDingRobotResult.getErrCode() == 0) {
                 return true;

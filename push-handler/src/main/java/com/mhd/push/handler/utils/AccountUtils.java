@@ -66,7 +66,7 @@ public class AccountUtils {
     @SuppressWarnings("unchecked")
     public <T> T getAccountById(Integer sendAccountId, Class<T> clazz) {
         try {
-            ChannelAccount dbchannelAccount = channelAccountMapper.selectById(Long.valueOf(sendAccountId));
+            ChannelAccount dbchannelAccount = getChannelAccountById(sendAccountId);
             if (Objects.nonNull(dbchannelAccount)) {
                 if (clazz.equals(WxMaService.class)) {
                     return (T) ConcurrentHashMapUtils.computeIfAbsent(miniProgramServiceMap, dbchannelAccount, account -> initMiniProgramService(JSON.parseObject(account.getAccountConfig(), WeChatMiniProgramAccount.class)));
@@ -80,6 +80,23 @@ public class AccountUtils {
             log.error("AccountUtils#getAccount fail! e:{}", Throwables.getStackTraceAsString(e));
         }
         return null;
+    }
+
+    /**
+     * 读取原始渠道账号实体。
+     *
+     * 限流、运维查询等场景需要拿到账户原始配置，此方法避免到处直接访问 Mapper。
+     */
+    public ChannelAccount getChannelAccountById(Integer sendAccountId) {
+        if (sendAccountId == null) {
+            return null;
+        }
+        try {
+            return channelAccountMapper.selectById(Long.valueOf(sendAccountId));
+        } catch (Exception e) {
+            log.error("AccountUtils#getChannelAccountById fail! e:{}", Throwables.getStackTraceAsString(e));
+            return null;
+        }
     }
 
     /**

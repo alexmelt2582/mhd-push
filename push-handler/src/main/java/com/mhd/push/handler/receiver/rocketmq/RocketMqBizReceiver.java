@@ -20,7 +20,8 @@ import org.springframework.stereotype.Component;
 @RocketMQMessageListener(topic = "${mhd.mq.topic.send}",
         consumerGroup = "${mhd.mq.rocketmq.consumer.group.send}",
         selectorType = SelectorType.TAG,
-        selectorExpression = "${mhd.mq.tagId.value}")
+    selectorExpression = "${mhd.mq.tagId.value}",
+    maxReconsumeTimes = 3)
 public class RocketMqBizReceiver implements RocketMQListener<MessageExt>, MessageReceiver {
 
     @Resource

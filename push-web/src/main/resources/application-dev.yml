@@ -105,8 +105,19 @@ mhd:
         max-reconsume-times: 3
     dlq:
       record-ttl-hours: 168
-      callback:
+      alert:
         enabled: false
+        throttle-seconds: 300
+        subject-prefix: "[MHD-DLQ]"
+        mail:
+          host: ""
+          port: 25
+          user: ""
+          pass: ""
+          from: ""
+          to: ""
+          ssl-enable: false
+          starttls-enable: false
     topic:
       send: austinBusiness
       send-orderly: austinBusinessOrderly
@@ -116,7 +127,7 @@ mhd:
       value: mhd
     rocketmq:
       orderly:
-        enabled: false
+        enabled: true
         # 仅命中的业务方走有序topic（逗号分隔）
         business-owners: order-center
       consumer:

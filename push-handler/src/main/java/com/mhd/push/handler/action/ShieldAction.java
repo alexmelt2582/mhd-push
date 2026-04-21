@@ -2,7 +2,7 @@ package com.mhd.push.handler.action;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
-import com.mhd.push.common.domain.AnchorInfo;
+import com.mhd.push.common.constant.RedisConstant;
 import com.mhd.push.common.domain.MsgPushLogRequest;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.enums.MsgPushState;
@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
  */
 @Service
 public class ShieldAction implements BusinessProcess<TaskInfo> {
-    private static final String NIGHT_SHIELD_BUT_NEXT_DAY_SEND_KEY = "night_shield_send";
     private static final long SECONDS_OF_A_DAY = 86400L;
     @Resource
     private RedisUtils redisUtils;
@@ -42,10 +41,12 @@ public class ShieldAction implements BusinessProcess<TaskInfo> {
     @Override
     public void process(ProcessContext<TaskInfo> context) {
         TaskInfo taskInfo = context.getProcessModel();
+        // 如果夜间不屏蔽，直接返回
         if (ShieldType.NIGHT_NO_SHIELD.getCode().equals(taskInfo.getShieldType())) {
             return;
         }
         if (LocalDateTime.now().getHour() < NIGHT) {
+            // 夜间屏蔽
             if (ShieldType.NIGHT_SHIELD.getCode().equals(taskInfo.getShieldType())) {
                 MsgPushLogRequest msgPushLogRequest = MsgPushLogRequest.builder()
                         .bizType(MsgPushTypeEnum.SEND.getCode())
@@ -58,8 +59,9 @@ public class ShieldAction implements BusinessProcess<TaskInfo> {
                         .build();
                 logUtils.print(msgPushLogRequest);
             }
+            // 夜间屏蔽（次日九点发送）
             if (ShieldType.NIGHT_SHIELD_BUT_NEXT_DAY_SEND.getCode().equals(taskInfo.getShieldType())) {
-                redisUtils.lPush(NIGHT_SHIELD_BUT_NEXT_DAY_SEND_KEY, JSON.toJSONString(taskInfo,
+                redisUtils.lPush(RedisConstant.NIGHT_SHIELD_BUT_NEXT_DAY_SEND_KEY, JSON.toJSONString(taskInfo,
                                 JSONWriter.Feature.WriteClassName),
                         SECONDS_OF_A_DAY);
                 MsgPushLogRequest msgPushLogRequest = MsgPushLogRequest.builder()

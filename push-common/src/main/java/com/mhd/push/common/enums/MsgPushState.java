@@ -43,6 +43,10 @@ public enum MsgPushState implements PowerfulEnum {
      */
     SEND_SUCCESS(60, "消息下发成功"),
     /**
+     * 下发结果待确认（调用第三方期间本地未完成最终确认，后续不自动重复发送）
+     */
+    SEND_PENDING_CONFIRM(65, "消息下发待确认"),
+    /**
      * 下发失败（调用渠道接口失败）
      */
     SEND_FAIL(70, "消息下发失败"),

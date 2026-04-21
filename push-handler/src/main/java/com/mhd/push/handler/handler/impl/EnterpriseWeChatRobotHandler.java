@@ -3,6 +3,7 @@ package com.mhd.push.handler.handler.impl;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
 import com.mhd.push.common.domain.AnchorInfo;
@@ -48,10 +49,16 @@ public class EnterpriseWeChatRobotHandler extends BaseHandler {
         try {
             EnterpriseWeChatRobotAccount account = accountUtils.getAccountById(taskInfo.getSendAccount(), EnterpriseWeChatRobotAccount.class);
             EnterpriseWeChatRobotParam enterpriseWeChatRobotParam = assembleParam(taskInfo);
-            String result = HttpRequest.post(account.getWebhook()).header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
+            HttpResponse response = HttpRequest.post(account.getWebhook()).header(Header.CONTENT_TYPE.getValue(), ContentType.JSON.getValue())
                     .body(JSON.toJSONString(enterpriseWeChatRobotParam))
                     .timeout(2000)
-                    .execute().body();
+                    .execute();
+            if (response.getStatus() == 429) {
+                recordExternalRateLimitBackoff(taskInfo, 1000L);
+                log.warn("EnterpriseWeChatRobotHandler#handler throttled, params:{}", JSON.toJSONString(taskInfo));
+                return false;
+            }
+            String result = response.body();
             EnterpriseWeChatRootResult weChatRootResult = JSON.parseObject(result, EnterpriseWeChatRootResult.class);
             if (Integer.valueOf(WxCpErrorMsgEnum.CODE_0.getCode()).equals(weChatRootResult.getErrcode())) {
                 return true;

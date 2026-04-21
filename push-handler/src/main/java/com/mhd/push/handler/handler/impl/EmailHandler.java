@@ -12,7 +12,7 @@ import com.mhd.push.common.domain.RecallTaskInfo;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.dto.model.EmailContentModel;
 import com.mhd.push.common.enums.ChannelType;
-import com.mhd.push.handler.enums.RateLimitStrategy;
+import com.mhd.push.handler.flowcontrol.RateLimitStrategy;
 import com.mhd.push.handler.flowcontrol.FlowControlParam;
 import com.mhd.push.handler.handler.BaseHandler;
 import com.mhd.push.handler.utils.AccountUtils;
@@ -47,8 +47,7 @@ public class EmailHandler extends BaseHandler {
         // 按照请求限流，默认单机 3 qps （具体数值配置在apollo动态调整)
         double rateInitValue = 3.0;
         flowControlParam = FlowControlParam.builder().rateInitValue(rateInitValue)
-                .rateLimitStrategy(RateLimitStrategy.REQUEST_RATE_LIMIT)
-                .rateLimiter(RateLimiter.create(rateInitValue)).build();
+                .rateLimitStrategy(RateLimitStrategy.REQUEST_RATE_LIMIT).build();
 
     }
 
@@ -63,8 +62,6 @@ public class EmailHandler extends BaseHandler {
             } else {
                 MailUtil.send(account, taskInfo.getReceiver(), emailContentModel.getTitle(), emailContentModel.getContent(), true, files.toArray(new File[0]));
             }
-
-
         } catch (Exception e) {
             log.error("EmailHandler#handler fail!{},params:{}", Throwables.getStackTraceAsString(e), taskInfo);
             return false;

@@ -22,7 +22,8 @@ import org.springframework.stereotype.Component;
         consumerGroup = "${mhd.mq.rocketmq.consumer.group.send-orderly}",
         selectorType = SelectorType.TAG,
         selectorExpression = "${mhd.mq.tagId.value}",
-        consumeMode = ConsumeMode.ORDERLY)
+    consumeMode = ConsumeMode.ORDERLY,
+    maxReconsumeTimes = 3)
 public class RocketMqOrderlyBizReceiver implements RocketMQListener<MessageExt>, MessageReceiver {
 
     @Resource

@@ -18,9 +18,9 @@ import com.mhd.push.common.pipeline.ProcessContext;
 import com.mhd.push.web.api.domain.MessageParam;
 import com.mhd.push.web.api.domain.SendTaskModel;
 import com.mhd.push.support.domain.entity.MessageTemplate;
-import com.mhd.push.support.mapper.MessageTemplateMapper;
 import com.mhd.push.support.utils.ContentHolderUtil;
 import com.mhd.push.support.utils.TaskInfoUtils;
+import com.mhd.push.web.service.MessageTemplateCacheService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,25 +44,20 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
     private static final String EXTRA_ORDER_KEY = "orderKey";
 
     @Resource
-    private MessageTemplateMapper messageTemplateMapper;
+    private MessageTemplateCacheService messageTemplateCacheService;
 
     /**
      * 获取 contentModel，替换模板msgContent中占位符信息
      */
-    private static ContentModel getContentModelValue(MessageTemplate messageTemplate, MessageParam messageParam) {
-        // 得到真正的ContentModel 类型
-        Integer sendChannel = messageTemplate.getSendChannel();
-        Class<? extends ContentModel> contentModelClass = ChannelType.getChanelModelClassByCode(sendChannel);
-
-        // 得到模板的 msgContent 和 入参
+    private static ContentModel getContentModelValue(MessageTemplateCacheService.MessageTemplateSnapshot snapshot,
+                                                     MessageParam messageParam) {
+        MessageTemplate messageTemplate = snapshot.getTemplate();
         Map<String, String> variables = messageParam.getVariables();
-        JSONObject jsonObject = JSON.parseObject(messageTemplate.getMsgContent());
 
         // 通过反射 组装出 contentModel
-        Field[] fields = ReflectUtil.getFields(contentModelClass);
-        ContentModel contentModel = ReflectUtil.newInstance(contentModelClass);
-        for (Field field : fields) {
-            String originValue = jsonObject.getString(field.getName());
+        ContentModel contentModel = ReflectUtil.newInstance(snapshot.getContentModelClass());
+        for (Field field : snapshot.getContentFields()) {
+            String originValue = snapshot.getTemplateContent().getString(field.getName());
 
             if (CharSequenceUtil.isNotBlank(originValue)) {
                 String resultValue = ContentHolderUtil.replacePlaceHolder(originValue, variables);
@@ -86,13 +81,14 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
         Long messageTemplateId = sendTaskModel.getMessageTemplateId();
 
         try {
-            MessageTemplate messageTemplate = messageTemplateMapper.selectById(messageTemplateId);
+            MessageTemplateCacheService.MessageTemplateSnapshot snapshot = messageTemplateCacheService.getActiveTemplateSnapshot(messageTemplateId);
+            MessageTemplate messageTemplate = snapshot == null ? null : snapshot.getTemplate();
             // 模板不存在或者已删除
             if (messageTemplate == null || messageTemplate.getIsDeleted().equals(CommonConstant.TRUE)) {
                 context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.TEMPLATE_NOT_FOUND));
                 return;
             }
-            List<TaskInfo> taskInfos = assembleTaskInfo(sendTaskModel, messageTemplate);
+            List<TaskInfo> taskInfos = assembleTaskInfo(sendTaskModel, snapshot);
             sendTaskModel.setTaskInfo(taskInfos);
         } catch (Exception e) {
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.SERVICE_ERROR));
@@ -103,7 +99,8 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
     /**
      * 组装 TaskInfo 任务消息
      */
-    private List<TaskInfo> assembleTaskInfo(SendTaskModel sendTaskModel, MessageTemplate messageTemplate) {
+    private List<TaskInfo> assembleTaskInfo(SendTaskModel sendTaskModel, MessageTemplateCacheService.MessageTemplateSnapshot snapshot) {
+        MessageTemplate messageTemplate = snapshot.getTemplate();
         List<MessageParam> messageParamList = sendTaskModel.getMessageParamList();
         List<TaskInfo> taskInfoList = new ArrayList<>();
         for (MessageParam messageParam : messageParamList) {
@@ -123,7 +120,7 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
                     .businessOwner(extra.get(EXTRA_BUSINESS_OWNER))
                     .dlqCallbackUrl(extra.get(EXTRA_DLQ_CALLBACK_URL))
                     .orderKey(extra.get(EXTRA_ORDER_KEY))
-                    .contentModel(getContentModelValue(messageTemplate, messageParam)).build();
+                    .contentModel(getContentModelValue(snapshot, messageParam)).build();
             if (CharSequenceUtil.isBlank(taskInfo.getBizId())) {
                 taskInfo.setBizId(taskInfo.getMessageId());
             }

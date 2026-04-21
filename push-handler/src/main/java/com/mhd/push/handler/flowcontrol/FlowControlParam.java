@@ -1,37 +1,29 @@
 package com.mhd.push.handler.flowcontrol;
 
 import com.google.common.util.concurrent.RateLimiter;
-import com.mhd.push.handler.enums.RateLimitStrategy;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 流量控制所需要的参数
- *
- * @author zhao-hao-dong
+ * Handler 侧传给限流模块的运行参数。
  */
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class FlowControlParam {
-    /**
-     * 限流器
-     * 子类初始化的时候指定
-     */
-    protected RateLimiter rateLimiter;
 
     /**
-     * 限流器初始限流大小
-     * 子类初始化的时候指定
+     * 默认 QPS。
+     * 当配置中心没有下发生产规则时，使用这个值作为兜底限流。
      */
     protected Double rateInitValue;
 
     /**
-     * 限流的策略
-     * 子类初始化的时候指定
+     * 本次发送的令牌计算方式。
+     * 请求级按 1 个 permit 计算，按接收人数限流时按 receiver.size() 计算。
      */
     protected RateLimitStrategy rateLimitStrategy;
 }
