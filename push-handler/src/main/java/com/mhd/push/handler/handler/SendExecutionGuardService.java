@@ -100,15 +100,15 @@ public class SendExecutionGuardService {
     }
 
     /**
-     * 根据 messageId 查询待确认记录。
+     * 根据 traceId 查询待确认记录。
      */
-    public List<SendExecutionRecord> queryPendingConfirmByMessageId(String messageId) {
-        if (messageId == null || messageId.isBlank()) {
+    public List<SendExecutionRecord> queryPendingConfirmByTraceId(String traceId) {
+        if (traceId == null || traceId.isBlank()) {
             return Collections.emptyList();
         }
         Set<String> executionKeys = stringRedisTemplate.opsForZSet().reverseRange(RedisConstant.SEND_PENDING_CONFIRM_INDEX_KEY, 0, -1);
         return loadRecords(executionKeys).stream()
-                .filter(record -> messageId.equals(record.getMessageId()))
+                .filter(record -> traceId.equals(record.getTraceId()))
                 .collect(Collectors.toList());
     }
 
@@ -166,10 +166,9 @@ public class SendExecutionGuardService {
         return SendExecutionRecord.builder()
                 .executionKey(executionKey)
                 .status(status.getCode())
-                .messageId(taskInfo.getMessageId())
-                .bizId(taskInfo.getBizId())
+                .traceId(taskInfo.getTraceId())
                 .businessOwner(taskInfo.getBusinessOwner())
-                .orderKey(taskInfo.getOrderKey())
+                .orderingKey(taskInfo.getOrderingKey())
                 .channelCode(channelCode)
                 .sendAccount(taskInfo.getSendAccount())
                 .receiverSummary(buildReceiverSummary(taskInfo))
@@ -213,7 +212,7 @@ public class SendExecutionGuardService {
     }
 
     private String buildExecutionKey(TaskInfo taskInfo, Integer channelCode) {
-        String raw = taskInfo.getMessageId() + ":" + channelCode + ":" + taskInfo.getSendAccount() + ":" + buildReceiverFingerprint(taskInfo);
+        String raw = taskInfo.getTraceId() + ":" + channelCode + ":" + taskInfo.getSendAccount() + ":" + buildReceiverFingerprint(taskInfo);
         return RedisConstant.buildSendExecutionKey(DigestUtils.md5DigestAsHex(raw.getBytes(StandardCharsets.UTF_8)));
     }
 

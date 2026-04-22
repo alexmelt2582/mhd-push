@@ -75,8 +75,8 @@ class BaseHandlerTest {
 
     private TaskInfo buildTask() {
         return TaskInfo.builder()
-                .messageId("MID-1")
-                .messageTemplateId(1001L)
+                .traceId("MID-1")
+                .templateId(1001L)
                 .sendAccount(1)
                 .receiver(Set.of("u1"))
                 .build();

@@ -1,10 +1,9 @@
 package com.mhd.push.handler.handler;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
-import com.mhd.push.common.domain.MsgPushLogRequest;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.enums.MsgPushState;
-import com.mhd.push.common.enums.MsgPushTypeEnum;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.handler.flowcontrol.FlowControlFactory;
 import com.mhd.push.handler.flowcontrol.FlowControlParam;
 import com.mhd.push.support.utils.LogUtils;
@@ -115,8 +114,8 @@ public abstract class BaseHandler implements Handler {
             }
             if (i < attempts) {
                 try {
-                    log.warn("BaseHandler#retrySend taskInfo retry {}/{} fail, messageId:{}, sleep:{}ms", i, attempts,
-                            taskInfo.getMessageId(), retryBackoffMs);
+                    log.warn("BaseHandler#retrySend taskInfo retry {}/{} fail, traceId:{}, sleep:{}ms", i, attempts,
+                            taskInfo.getTraceId(), retryBackoffMs);
                     Thread.sleep(retryBackoffMs);
 
                 } catch (InterruptedException e) {
@@ -129,39 +128,18 @@ public abstract class BaseHandler implements Handler {
     }
 
     private void logSuccess(TaskInfo taskInfo) {
-        logUtils.print(MsgPushLogRequest.builder()
-                .bizType(MsgPushTypeEnum.SEND.getCode())
-                .messageId(taskInfo.getMessageId())
-                .messageTemplateId(taskInfo.getMessageTemplateId())
-                .receiver(taskInfo.getReceiver())
-                .state(MsgPushState.SEND_SUCCESS.getCode())
-                .stateDescription(MsgPushState.SEND_SUCCESS.getDescription())
-                .timestamp(System.currentTimeMillis())
-                .build());
+        LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_SUCCESS);
+        logUtils.print(logRecord);
     }
 
     private void logFail(TaskInfo taskInfo) {
-        logUtils.print(MsgPushLogRequest.builder()
-                .bizType(MsgPushTypeEnum.SEND.getCode())
-                .messageId(taskInfo.getMessageId())
-                .messageTemplateId(taskInfo.getMessageTemplateId())
-                .receiver(taskInfo.getReceiver())
-                .state(MsgPushState.SEND_FAIL.getCode())
-                .stateDescription(MsgPushState.SEND_FAIL.getDescription())
-                .timestamp(System.currentTimeMillis())
-                .build());
+        LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_FAIL);
+        logUtils.print(logRecord);
     }
 
     private void logPendingConfirm(TaskInfo taskInfo) {
-        logUtils.print(MsgPushLogRequest.builder()
-                .bizType(MsgPushTypeEnum.SEND.getCode())
-                .messageId(taskInfo.getMessageId())
-                .messageTemplateId(taskInfo.getMessageTemplateId())
-                .receiver(taskInfo.getReceiver())
-                .state(MsgPushState.SEND_PENDING_CONFIRM.getCode())
-                .stateDescription(MsgPushState.SEND_PENDING_CONFIRM.getDescription())
-                .timestamp(System.currentTimeMillis())
-                .build());
+        LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_PENDING_CONFIRM);
+        logUtils.print(logRecord);
     }
 
     protected void recordExternalRateLimitBackoff(TaskInfo taskInfo, long retryAfterMs) {

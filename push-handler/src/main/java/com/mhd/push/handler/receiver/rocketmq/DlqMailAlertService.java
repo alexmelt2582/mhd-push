@@ -57,12 +57,12 @@ public class DlqMailAlertService implements DlqAlertService {
         }
         List<String> receivers = parseReceivers(to);
         if (!isMailConfigValid(receivers)) {
-            log.warn("DLQ alert skipped because mail config is incomplete, messageId:{}", record.getMessageId());
+            log.warn("DLQ alert skipped because mail config is incomplete, messageId:{}", record.getTraceId());
             return;
         }
 
         if (!tryAcquireThrottle(record)) {
-            log.debug("DLQ alert throttled, messageId:{}", record.getMessageId());
+            log.debug("DLQ alert throttled, messageId:{}", record.getTraceId());
             return;
         }
 
@@ -82,9 +82,9 @@ public class DlqMailAlertService implements DlqAlertService {
         String content = buildContent(record);
         try {
             MailUtil.send(account, receivers, subject, content, false);
-            log.info("DLQ alert mail sent, messageId:{}, to:{}", record.getMessageId(), receivers);
+            log.info("DLQ alert mail sent, messageId:{}, to:{}", record.getTraceId(), receivers);
         } catch (Exception ex) {
-            log.error("DLQ alert mail send fail, messageId:{}, err:{}", record.getMessageId(), ex.getMessage(), ex);
+            log.error("DLQ alert mail send fail, messageId:{}, err:{}", record.getTraceId(), ex.getMessage(), ex);
         }
     }
 
@@ -116,8 +116,7 @@ public class DlqMailAlertService implements DlqAlertService {
 
     private String buildContent(MqDlqRecord record) {
         return "DLQ message detected, manual handling required." + "\n"
-                + "messageId=" + record.getMessageId() + "\n"
-                + "bizId=" + record.getBizId() + "\n"
+                + "messageId=" + record.getTraceId() + "\n"
                 + "businessOwner=" + record.getBusinessOwner() + "\n"
                 + "topic=" + record.getTopic() + "\n"
                 + "reconsumeTimes=" + record.getReconsumeTimes() + "/" + record.getMaxReconsumeTimes() + "\n"

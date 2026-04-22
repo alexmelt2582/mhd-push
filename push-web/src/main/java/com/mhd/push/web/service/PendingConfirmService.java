@@ -20,8 +20,8 @@ public class PendingConfirmService {
         return sendExecutionGuardService.listPendingConfirmRecords(limit == null ? 20 : limit);
     }
 
-    public List<SendExecutionRecord> queryByMessageId(String messageId) {
-        return sendExecutionGuardService.queryPendingConfirmByMessageId(messageId);
+    public List<SendExecutionRecord> queryByTraceId(String traceId) {
+        return sendExecutionGuardService.queryPendingConfirmByTraceId(traceId);
     }
 
     public boolean confirmSuccess(String executionKey) {

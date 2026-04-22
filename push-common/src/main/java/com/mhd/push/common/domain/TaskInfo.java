@@ -14,7 +14,6 @@ import java.util.Set;
  * 发送任务信息
  *
  * @author zhao-hao-dong
-
  */
 @Data
 @Builder
@@ -22,26 +21,24 @@ import java.util.Set;
 @NoArgsConstructor
 public class TaskInfo implements Serializable, ProcessModel {
     /**
-     * 业务消息发送Id, 用于链路追踪, 若不存在, 则使用 messageId
+     * 系统生成的唯一链路追踪 ID。
      */
-    private String bizId;
+    private String traceId;
 
     /**
-     * 消息唯一Id(数据追踪使用)
-     * 生成逻辑参考 TaskInfoUtils
+     * 业务方标识（用于按业务方控制有序策略）
      */
-    private String messageId;
+    private String businessOwner;
+
+    /**
+     * 顺序键（同一键内严格有序）
+     */
+    private String orderingKey;
 
     /**
      * 消息模板Id
      */
-    private Long messageTemplateId;
-
-    /**
-     * 业务Id(数据追踪使用)
-     * 生成逻辑参考 TaskInfoUtils
-     */
-    private Long businessId;
+    private Long templateId;
 
     /**
      * 接收者
@@ -85,19 +82,4 @@ public class TaskInfo implements Serializable, ProcessModel {
      * 发送账号（邮件下可有多个发送账号、短信可有多个发送账号..）
      */
     private Integer sendAccount;
-
-    /**
-     * 业务方标识（用于按业务方控制有序策略）
-     */
-    private String businessOwner;
-
-    /**
-     * DLQ回访地址（最终重试失败后可回调）
-     */
-    private String dlqCallbackUrl;
-
-    /**
-     * 顺序键（同一键内严格有序）
-     */
-    private String orderKey;
 }

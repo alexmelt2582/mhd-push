@@ -9,7 +9,6 @@ import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.base.Throwables;
 import com.mhd.push.common.enums.ErrorCodeEnum;
-import com.mhd.push.common.pipeline.BasicResultVO;
 import com.mhd.push.common.mybatis.domain.PageParam;
 import com.mhd.push.common.mybatis.domain.PageResponse;
 import com.mhd.push.common.mybatis.domain.PageResultUtils;
@@ -19,7 +18,7 @@ import com.mhd.push.support.domain.entity.MessageTemplate;
 import com.mhd.push.web.api.domain.MessageParam;
 import com.mhd.push.web.api.domain.SendRequest;
 import com.mhd.push.web.api.domain.SendResponse;
-import com.mhd.push.web.api.enums.BusinessCode;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.web.api.service.SendService;
 import com.mhd.push.web.domain.dto.MessageTemplateParam;
 import com.mhd.push.web.domain.dto.MessageTemplateSaveDTO;
@@ -40,7 +39,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -136,12 +134,12 @@ public class MessageTemplateController extends BaseController{
         // 链式调用保持不变，逻辑清晰
         MessageParam messageParam = MessageParam.builder()
                 .receiver(record.receiver())
-                .variables(variables)
+                .templateParams(variables)
                 .build();
 
         SendRequest sendRequest = SendRequest.builder()
-                .code(BusinessCode.COMMON_SEND.getCode())
-                .messageTemplateId(record.id())
+                .code(SendTypeEnum.SEND.getCode())
+                .templateId(record.id())
                 .messageParam(messageParam)
                 .build();
 

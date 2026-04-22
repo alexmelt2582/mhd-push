@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
  * 发送消息：前置参数校验
  *
  * @author zhao-hao-dong
-
  */
 @Slf4j
 @Service
@@ -30,24 +29,23 @@ public class SendPreCheckAction implements BusinessProcess<SendTaskModel> {
     public void process(ProcessContext<SendTaskModel> context) {
         SendTaskModel sendTaskModel = context.getProcessModel();
 
-        Long messageTemplateId = sendTaskModel.getMessageTemplateId();
+        // 1. 检查模板ID和参数信息是否存在
+        Long templateId = sendTaskModel.getTemplateId();
         List<MessageParam> messageParamList = sendTaskModel.getMessageParamList();
-
-        // 没有传入 消息模板Id 或者 messageParam
-        if (Objects.isNull(messageTemplateId) || CollUtil.isEmpty(messageParamList)) {
+        if (Objects.isNull(templateId) || CollUtil.isEmpty(messageParamList)) {
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.CLIENT_BAD_PARAMETERS, "模板ID或参数列表为空"));
             return;
         }
 
-        // 过滤 receiver=null 的 messageParam
+        // 过滤 receiver 是空的数据
         List<MessageParam> resultMessageParamList = messageParamList.stream().filter(messageParam -> !CharSequenceUtil.isBlank(messageParam.getReceiver())).collect(Collectors.toList());
-        if(CollUtil.isEmpty(resultMessageParamList)) {
+        if (CollUtil.isEmpty(resultMessageParamList)) {
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.CLIENT_BAD_PARAMETERS, "含接受者的参数列表为空"));
             return;
         }
 
         // 过滤 receiver 大于100的请求
-        if(resultMessageParamList.stream().anyMatch(messageParam -> messageParam.getReceiver().split(StrPool.COMMA).length > GlobalConstant.BATCH_RECEIVER_SIZE)) {
+        if (resultMessageParamList.stream().anyMatch(messageParam -> messageParam.getReceiver().split(StrPool.COMMA).length > GlobalConstant.BATCH_RECEIVER_SIZE)) {
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.TOO_MANY_RECEIVER));
             return;
         }

@@ -34,14 +34,14 @@ public class PendingConfirmController extends BaseController {
     }
 
     /**
-     * 按 messageId 查询待确认记录。
+     * 按 traceId 查询待确认记录。
      */
     @GetMapping("/query")
-    public BaseResponse<List<SendExecutionRecord>> query(@RequestParam String messageId) {
-        if (CharSequenceUtil.isBlank(messageId)) {
+    public BaseResponse<List<SendExecutionRecord>> query(@RequestParam String traceId) {
+        if (CharSequenceUtil.isBlank(traceId)) {
             return BaseResultUtils.successOfData(Collections.emptyList());
         }
-        return BaseResultUtils.successOfData(pendingConfirmService.queryByMessageId(messageId));
+        return BaseResultUtils.successOfData(pendingConfirmService.queryByTraceId(traceId));
     }
 
     /**

@@ -5,11 +5,12 @@ import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
-import com.mhd.push.common.domain.AnchorInfo;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.common.domain.RecallTaskInfo;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.dto.model.MiniProgramContentModel;
 import com.mhd.push.common.enums.ChannelType;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.handler.handler.BaseHandler;
 import com.mhd.push.handler.utils.AccountUtils;
 import com.mhd.push.support.utils.LogUtils;
@@ -50,8 +51,8 @@ public class MiniProgramAccountHandler extends BaseHandler {
             wxMaService.getSubscribeService().sendSubscribeMsg(message);
             return true;
         } catch (WxErrorException e) {
-            logUtils.print(AnchorInfo.builder().bizId(taskInfo.getBizId()).messageId(taskInfo.getMessageId()).businessId(taskInfo.getBusinessId())
-                    .ids(taskInfo.getReceiver()).state(e.getError().getErrorCode()).build());
+            LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, e.getError().getErrorCode(), e.getError().getErrorMsg());
+            logUtils.print(logRecord);
         } catch (Exception e) {
             log.error("MiniProgramAccountHandler#handler fail:{},params:{}", Throwables.getStackTraceAsString(e), JSON.toJSONString(taskInfo));
         }

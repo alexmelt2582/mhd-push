@@ -15,8 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MqDlqRecord implements Serializable {
-    private String messageId;
-    private String bizId;
+    private String traceId;
     private String businessOwner;
     private String topic;
     private String tagId;

@@ -144,12 +144,12 @@ class RocketMqConsumeServiceTest {
         return messageExt;
     }
 
-    private TaskInfo buildTask(String owner, String bizId) {
+    private TaskInfo buildTask(String owner, String orderingKey) {
         return TaskInfo.builder()
-                .messageId("MID-" + bizId)
-                .bizId(bizId)
+                .traceId("MID-" + orderingKey)
+                .orderingKey(orderingKey)
                 .businessOwner(owner)
-                .messageTemplateId(1002L)
+                .templateId(1002L)
                 .build();
     }
 }

@@ -9,7 +9,6 @@ public interface RedisConstant {
     /**
      * 敏感词
      */
-    String SENSITIVE_WORD_DICT = GLOBAL_PREFIX + "sensitive_word_dict";
     String SENSITIVE_WORD_DICT_CURRENT_VERSION = GLOBAL_PREFIX + "sensitive_word_dict:current_version";
     String SENSITIVE_WORD_DICT_VERSION_PREFIX = GLOBAL_PREFIX + "sensitive_word_dict:version:";
 
@@ -23,8 +22,6 @@ public interface RedisConstant {
      * 夜间屏蔽（次日九点发送）Key
      */
     String NIGHT_SHIELD_BUT_NEXT_DAY_SEND_KEY = GLOBAL_PREFIX + "night_shield_send";
-
-
 
     static String buildSensitiveWordDictKey(String version) {
         return SENSITIVE_WORD_DICT_VERSION_PREFIX + version;
@@ -127,6 +124,4 @@ public interface RedisConstant {
     static String buildSendExecutionKey(String key) {
         return SEND_EXECUTION_KEY_PREFIX + key;
     }
-
-
 }

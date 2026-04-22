@@ -1,32 +1,22 @@
 package com.mhd.push.common.domain;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
  * @author zhao-hao-dong
-
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class SimpleTaskInfo {
     /**
-     * 业务消息发送Id, 用于链路追踪, 若不存在, 则使用 messageId
-     */
-    private String bizId;
-
-    /**
-     * 消息唯一Id(数据追踪使用)
-     * 生成逻辑参考 TaskInfoUtils
+     * 对外返回给调用方的唯一链路追踪 ID。
      */
     private String messageId;
 
-    /**
-     * 业务Id(数据追踪使用)
-     * 生成逻辑参考 TaskInfoUtils
-     */
-    private Long businessId;
+    public static SimpleTaskInfo fromTaskInfo(TaskInfo taskInfo) {
+        return new SimpleTaskInfo(taskInfo == null ? null : taskInfo.getTraceId());
+    }
 }

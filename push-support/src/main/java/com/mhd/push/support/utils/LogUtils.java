@@ -4,9 +4,8 @@ import cn.monitor4all.logRecord.bean.LogDTO;
 import cn.monitor4all.logRecord.service.CustomLogListener;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
-import com.mhd.push.common.domain.AnchorInfo;
 import com.mhd.push.common.domain.LogParam;
-import com.mhd.push.common.domain.MsgPushLogRequest;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.support.mq.SendMqService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,24 +45,8 @@ public class LogUtils extends CustomLogListener {
     /**
      * 记录打点信息
      */
-    public void print(AnchorInfo anchorInfo) {
-        anchorInfo.setLogTimestamp(System.currentTimeMillis());
-        String message = JSON.toJSONString(anchorInfo);
-        log.info(message);
-
-        try {
-            sendMqService.send(logTopic, message);
-        } catch (Exception e) {
-            log.error("LogUtils#print send mq fail! e:{},params:{}", Throwables.getStackTraceAsString(e)
-                    , JSON.toJSONString(anchorInfo));
-        }
-    }
-
-    /**
-     * 记录打点信息
-     */
-    public void print(MsgPushLogRequest msgPushLogRequest) {
-        String message = JSON.toJSONString(msgPushLogRequest);
+    public void print(LogRecord logRecord) {
+        String message = JSON.toJSONString(logRecord);
         log.info(message);
         try {
             sendMqService.send(logTopic, message);

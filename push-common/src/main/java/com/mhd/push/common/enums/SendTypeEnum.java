@@ -1,21 +1,22 @@
-package com.mhd.push.web.api.enums;
+package com.mhd.push.common.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
 /**
+ * 发送类型枚举
+ *
  * @author zhao-hao-dong
-
  */
 @Getter
 @ToString
 @AllArgsConstructor
-public enum BusinessCode {
+public enum SendTypeEnum {
     /**
      * 普通发送流程
      */
-    COMMON_SEND("send", "普通发送"),
+    SEND("send", "普通发送"),
 
     /**
      * 撤回流程

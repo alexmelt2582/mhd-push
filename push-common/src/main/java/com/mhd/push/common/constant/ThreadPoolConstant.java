@@ -21,7 +21,8 @@ public class ThreadPoolConstant {
     public static final Integer COMMON_MAX_POOL_SIZE = 2;
     public static final Integer COMMON_KEEP_LIVE_TIME = 60;
     public static final Integer COMMON_QUEUE_SIZE = 128;
-    public static final Integer ORDERLY_EXECUTOR_STRIPES = 16;
+    public static final Integer ORDERLY_EXECUTOR_STRIPES = 3;
+
     /**
      * big queue size
      */

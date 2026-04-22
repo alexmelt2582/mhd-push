@@ -13,7 +13,6 @@ import java.util.List;
  * 发送消息任务模型
  *
  * @author zhao-hao-dong
-
  */
 @Data
 @AllArgsConstructor
@@ -23,8 +22,12 @@ public class SendTaskModel implements ProcessModel {
     /**
      * 消息模板Id
      */
-    private Long messageTemplateId;
+    private Long templateId;
 
+    /**
+     * 排序Key
+     */
+    private String orderingKey;
     /**
      * 请求参数
      */

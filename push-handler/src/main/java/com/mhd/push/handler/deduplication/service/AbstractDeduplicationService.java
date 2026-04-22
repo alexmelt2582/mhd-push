@@ -1,9 +1,9 @@
 package com.mhd.push.handler.deduplication.service;
 
 import cn.hutool.core.collection.CollUtil;
-import com.mhd.push.common.domain.MsgPushLogRequest;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.common.domain.TaskInfo;
-import com.mhd.push.common.enums.MsgPushTypeEnum;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.handler.deduplication.DeduplicationHolder;
 import com.mhd.push.handler.deduplication.DeduplicationParam;
 import com.mhd.push.support.utils.LogUtils;
@@ -39,16 +39,8 @@ public abstract class AbstractDeduplicationService implements DeduplicationServi
         // 剔除符合去重条件的用户
         if (CollUtil.isNotEmpty(filterReceiver)) {
             taskInfo.getReceiver().removeAll(filterReceiver);
-            MsgPushLogRequest msgPushLogRequest = MsgPushLogRequest.builder()
-                    .bizType(MsgPushTypeEnum.SEND.getCode())
-                    .messageId(taskInfo.getMessageId())
-                    .messageTemplateId(taskInfo.getMessageTemplateId())
-                    .receiver(taskInfo.getReceiver())
-                    .state(param.getMsgPushState().getCode())
-                    .stateDescription(param.getMsgPushState().getDescription())
-                    .timestamp(System.currentTimeMillis())
-                    .build();
-            logUtils.print(msgPushLogRequest);
+            LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, param.getMsgPushState());
+            logUtils.print(logRecord);
         }
     }
 

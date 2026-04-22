@@ -7,8 +7,8 @@ import com.mhd.push.common.pipeline.BasicResultVO;
 import com.mhd.push.common.pipeline.ProcessContext;
 import com.mhd.push.common.pipeline.ProcessController;
 import com.mhd.push.web.api.domain.BatchSendRequest;
-import com.mhd.push.web.api.domain.SendResponse;
 import com.mhd.push.web.api.domain.SendRequest;
+import com.mhd.push.web.api.domain.SendResponse;
 import com.mhd.push.web.api.domain.SendTaskModel;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 发送接口
  *
  * @author zhao-hao-dong
-
  */
 @Service
 public class SendServiceImpl implements SendService {
@@ -96,7 +96,8 @@ public class SendServiceImpl implements SendService {
 
         try {
             SendTaskModel sendTaskModel = SendTaskModel.builder()
-                    .messageTemplateId(sendRequest.getMessageTemplateId())
+                    .templateId(sendRequest.getTemplateId())
+                    .orderingKey(sendRequest.getOrderingKey())
                     .messageParamList(Collections.singletonList(sendRequest.getMessageParam()))
                     .build();
 
@@ -107,7 +108,11 @@ public class SendServiceImpl implements SendService {
                     .response(BasicResultVO.success()).build();
 
             ProcessContext process = processController.process(context);
-            SendResponse response = new SendResponse(process.getResponse().getStatus(), process.getResponse().getMsg(), (List<SimpleTaskInfo>) process.getResponse().getData());
+            SendResponse response = new SendResponse(
+                    process.getResponse().getStatus(),
+                    process.getResponse().getMsg(),
+                    buildResponseData((SendTaskModel) process.getProcessModel())
+            );
             requestIdempotencyService.onSuccess(idempotencyKey, response);
             return response;
         } catch (Exception e) {
@@ -133,7 +138,7 @@ public class SendServiceImpl implements SendService {
 
         try {
             SendTaskModel sendTaskModel = SendTaskModel.builder()
-                    .messageTemplateId(batchSendRequest.getMessageTemplateId())
+                    .templateId(batchSendRequest.getMessageTemplateId())
                     .messageParamList(batchSendRequest.getMessageParamList())
                     .build();
 
@@ -144,12 +149,25 @@ public class SendServiceImpl implements SendService {
                     .response(BasicResultVO.success()).build();
 
             ProcessContext process = processController.process(context);
-            SendResponse response = new SendResponse(process.getResponse().getStatus(), process.getResponse().getMsg(), (List<SimpleTaskInfo>) process.getResponse().getData());
+            SendResponse response = new SendResponse(
+                    process.getResponse().getStatus(),
+                    process.getResponse().getMsg(),
+                    buildResponseData((SendTaskModel) process.getProcessModel())
+            );
             requestIdempotencyService.onSuccess(idempotencyKey, response);
             return response;
         } catch (Exception e) {
             requestIdempotencyService.onFail(idempotencyKey);
             throw e;
         }
+    }
+
+    private List<SimpleTaskInfo> buildResponseData(SendTaskModel sendTaskModel) {
+        if (sendTaskModel == null || sendTaskModel.getTaskInfo() == null) {
+            return null;
+        }
+        return sendTaskModel.getTaskInfo().stream()
+                .map(SimpleTaskInfo::fromTaskInfo)
+                .collect(Collectors.toList());
     }
 }

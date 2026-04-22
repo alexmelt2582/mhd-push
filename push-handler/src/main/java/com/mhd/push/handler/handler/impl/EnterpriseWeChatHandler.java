@@ -5,12 +5,13 @@ import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
 import com.mhd.push.common.constant.CommonConstant;
 import com.mhd.push.common.constant.GlobalConstant;
-import com.mhd.push.common.domain.AnchorInfo;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.common.domain.RecallTaskInfo;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.dto.model.EnterpriseWeChatContentModel;
 import com.mhd.push.common.enums.ChannelType;
 import com.mhd.push.common.enums.SendMessageType;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.handler.handler.BaseHandler;
 import com.mhd.push.handler.utils.AccountUtils;
 import com.mhd.push.support.config.SupportThreadPoolConfig;
@@ -64,10 +65,11 @@ public class EnterpriseWeChatHandler extends BaseHandler {
 
             // 发送成功后记录TaskId，用于消息撤回(支持24小时之内)
             if (Integer.valueOf(WxCpErrorMsgEnum.CODE_0.getCode()).equals(result.getErrCode())) {
-                saveRecallInfo(WE_CHAT_RECALL_KEY_PREFIX, taskInfo.getMessageTemplateId(), String.valueOf(result.getMsgId()), CommonConstant.ONE_DAY_SECOND);
+                saveRecallInfo(WE_CHAT_RECALL_KEY_PREFIX, taskInfo.getTemplateId(), String.valueOf(result.getMsgId()), CommonConstant.ONE_DAY_SECOND);
                 return true;
             }
-            logUtils.print(AnchorInfo.builder().bizId(taskInfo.getBizId()).messageId(taskInfo.getMessageId()).businessId(taskInfo.getBusinessId()).ids(taskInfo.getReceiver()).state(result.getErrCode()).build());
+            LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, result.getErrCode(), result.getErrMsg());
+            logUtils.print(logRecord);
         } catch (Exception e) {
             log.error("EnterpriseWeChatHandler#handler fail:{},params:{}",
                     Throwables.getStackTraceAsString(e), JSON.toJSONString(taskInfo));

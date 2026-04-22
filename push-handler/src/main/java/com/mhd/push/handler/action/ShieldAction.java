@@ -3,10 +3,10 @@ package com.mhd.push.handler.action;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONWriter;
 import com.mhd.push.common.constant.RedisConstant;
-import com.mhd.push.common.domain.MsgPushLogRequest;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.enums.MsgPushState;
-import com.mhd.push.common.enums.MsgPushTypeEnum;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.common.enums.ShieldType;
 import com.mhd.push.common.pipeline.BusinessProcess;
 import com.mhd.push.common.pipeline.ProcessContext;
@@ -48,32 +48,16 @@ public class ShieldAction implements BusinessProcess<TaskInfo> {
         if (LocalDateTime.now().getHour() < NIGHT) {
             // 夜间屏蔽
             if (ShieldType.NIGHT_SHIELD.getCode().equals(taskInfo.getShieldType())) {
-                MsgPushLogRequest msgPushLogRequest = MsgPushLogRequest.builder()
-                        .bizType(MsgPushTypeEnum.SEND.getCode())
-                        .messageId(taskInfo.getMessageId())
-                        .messageTemplateId(taskInfo.getMessageTemplateId())
-                        .receiver(taskInfo.getReceiver())
-                        .state(MsgPushState.NIGHT_SHIELD.getCode())
-                        .stateDescription(MsgPushState.NIGHT_SHIELD.getDescription())
-                        .timestamp(System.currentTimeMillis())
-                        .build();
-                logUtils.print(msgPushLogRequest);
+                LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.NIGHT_SHIELD);
+                logUtils.print(logRecord);
             }
             // 夜间屏蔽（次日九点发送）
             if (ShieldType.NIGHT_SHIELD_BUT_NEXT_DAY_SEND.getCode().equals(taskInfo.getShieldType())) {
                 redisUtils.lPush(RedisConstant.NIGHT_SHIELD_BUT_NEXT_DAY_SEND_KEY, JSON.toJSONString(taskInfo,
                                 JSONWriter.Feature.WriteClassName),
                         SECONDS_OF_A_DAY);
-                MsgPushLogRequest msgPushLogRequest = MsgPushLogRequest.builder()
-                        .bizType(MsgPushTypeEnum.SEND.getCode())
-                        .messageId(taskInfo.getMessageId())
-                        .messageTemplateId(taskInfo.getMessageTemplateId())
-                        .receiver(taskInfo.getReceiver())
-                        .state(MsgPushState.NIGHT_SHIELD_NEXT_SEND.getCode())
-                        .stateDescription(MsgPushState.NIGHT_SHIELD_NEXT_SEND.getDescription())
-                        .timestamp(System.currentTimeMillis())
-                        .build();
-                logUtils.print(msgPushLogRequest);
+                LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.NIGHT_SHIELD_NEXT_SEND);
+                logUtils.print(logRecord);
             }
             context.setNeedBreak(true);
         }

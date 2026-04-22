@@ -9,14 +9,13 @@ import com.mhd.push.common.enums.ErrorCodeEnum;
 import com.mhd.push.common.pipeline.BasicResultVO;
 import com.mhd.push.common.pipeline.BusinessProcess;
 import com.mhd.push.common.pipeline.ProcessContext;
-import com.mhd.push.web.api.domain.SendTaskModel;
 import com.mhd.push.support.mq.SendMqService;
+import com.mhd.push.web.api.domain.SendTaskModel;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.Set;
  * 2. 返回拼装好的messageId给到接口调用方
  *
  * @author zhao-hao-dong
-
  */
 @Slf4j
 @Service
@@ -50,22 +48,15 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
     private int maxSendAttempts;
     @Value("${mhd.mq.retry.send.backoff-ms:200}")
     private long sendRetryBackoffMs;
-    @Value("${mhd.mq.payload.max-size-bytes:3145728}")
-    private int maxPayloadSizeBytes;
+
 
     @Override
     public void process(ProcessContext<SendTaskModel> context) {
         SendTaskModel sendTaskModel = context.getProcessModel();
-        List<TaskInfo> taskInfo = sendTaskModel.getTaskInfo();
-        try{
-            String message = JSON.toJSONString(taskInfo, JSONWriter.Feature.WriteClassName);
-            // 消息内容是否超出限制大小
-            if (message.getBytes(StandardCharsets.UTF_8).length > maxPayloadSizeBytes) {
-                context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.MESSAGE_PAYLOAD_TOO_LARGE));
-                return;
-            }
-
-            TaskInfo firstTaskInfo = CollUtil.getFirst(taskInfo.listIterator());
+        List<TaskInfo> taskInfoList = sendTaskModel.getTaskInfo();
+        try {
+            String message = JSON.toJSONString(taskInfoList, JSONWriter.Feature.WriteClassName);
+            TaskInfo firstTaskInfo = CollUtil.getFirst(taskInfoList.listIterator());
             boolean useOrderly = shouldUseOrderly(firstTaskInfo);
             String orderKey = useOrderly ? buildOrderKey(firstTaskInfo) : null;
             String topic = useOrderly ? orderlySendMessageTopic : sendMessageTopic;
@@ -78,8 +69,8 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
                     if (i >= attempts) {
                         throw ex;
                     }
-                    log.warn("send mq retry {}/{} fail, messageId:{}, e:{}", i, attempts,
-                            firstTaskInfo == null ? null : firstTaskInfo.getMessageId(), ExceptionUtil.stacktraceToString(ex));
+                    log.warn("send mq retry {}/{} fail, traceId:{}, e:{}", i, attempts,
+                            firstTaskInfo == null ? null : firstTaskInfo.getTraceId(), ExceptionUtil.stacktraceToString(ex));
                     try {
                         Thread.sleep(sendRetryBackoffMs);
                     } catch (InterruptedException interruptedException) {
@@ -91,15 +82,12 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
         } catch (Exception e) {
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.SERVICE_ERROR));
             log.error("send {} fail! e:{},params:{}", mqPipeline, ExceptionUtil.stacktraceToString(e)
-                    , JSON.toJSONString(CollUtil.getFirst(taskInfo.listIterator())));
+                    , JSON.toJSONString(CollUtil.getFirst(taskInfoList.listIterator())));
         }
     }
 
     private boolean shouldUseOrderly(TaskInfo taskInfo) {
         if (!orderlyEnabled || taskInfo == null) {
-            return false;
-        }
-        if (taskInfo.getBizId() == null || taskInfo.getBizId().isBlank()) {
             return false;
         }
         String owner = taskInfo.getBusinessOwner();
@@ -114,17 +102,14 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
         if (taskInfo == null) {
             return null;
         }
-        if (taskInfo.getOrderKey() != null && !taskInfo.getOrderKey().isBlank()) {
-            return taskInfo.getOrderKey();
-        }
+        StringBuilder sb = new StringBuilder();
         if (taskInfo.getBusinessOwner() != null && !taskInfo.getBusinessOwner().isBlank()
-                && taskInfo.getBizId() != null && !taskInfo.getBizId().isBlank()) {
-            return taskInfo.getBusinessOwner() + ":" + taskInfo.getBizId();
+                && taskInfo.getOrderingKey() != null && !taskInfo.getOrderingKey().isBlank()) {
+            sb.append(taskInfo.getBusinessOwner())
+                    .append(":")
+                    .append(taskInfo.getOrderingKey());
         }
-        if (taskInfo.getBizId() != null && !taskInfo.getBizId().isBlank()) {
-            return taskInfo.getBizId();
-        }
-        return taskInfo.getMessageId();
+        return sb.toString();
     }
 
     private Set<String> parseBusinessOwners(String config) {

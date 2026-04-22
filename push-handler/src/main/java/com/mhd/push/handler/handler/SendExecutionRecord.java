@@ -29,14 +29,10 @@ public class SendExecutionRecord {
     /**
      * 业务侧的消息唯一标识。
      */
-    private String messageId;
+    private String traceId;
 
-    /**
-     * 业务链路字段，便于运维定位和筛选。
-     */
-    private String bizId;
     private String businessOwner;
-    private String orderKey;
+    private String orderingKey;
 
     /**
      * 渠道及账号维度。

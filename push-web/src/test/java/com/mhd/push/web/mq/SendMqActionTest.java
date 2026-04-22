@@ -1,5 +1,7 @@
 package com.mhd.push.web.mq;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.enums.ErrorCodeEnum;
 import com.mhd.push.common.pipeline.BasicResultVO;
@@ -7,8 +9,6 @@ import com.mhd.push.common.pipeline.ProcessContext;
 import com.mhd.push.support.mq.SendMqService;
 import com.mhd.push.web.api.action.send.SendMqAction;
 import com.mhd.push.web.api.domain.SendTaskModel;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,10 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendMqActionTest {
@@ -53,11 +50,11 @@ class SendMqActionTest {
     }
 
     @Test
-    // S1: 有序业务方A应进入有序topic，并生成稳定顺序键
+        // S1: 有序业务方A应进入有序topic，并生成稳定顺序键
     void shouldRouteToOrderlyTopicForConfiguredOwner() {
         doNothing().when(sendMqService).send(anyString(), anyString(), anyString(), any());
 
-        TaskInfo taskInfo = buildTask("order-center", "ORDER-1", null);
+        TaskInfo taskInfo = buildTask("order-center", null);
         ProcessContext<SendTaskModel> context = buildContext(taskInfo);
 
         sendMqAction.process(context);
@@ -71,11 +68,11 @@ class SendMqActionTest {
     }
 
     @Test
-    // S2: 有序业务方B传入自定义orderKey时，应优先使用业务指定值
+        // S2: 有序业务方B传入自定义orderKey时，应优先使用业务指定值
     void shouldUseCustomOrderKeyWhenProvided() {
         doNothing().when(sendMqService).send(anyString(), anyString(), anyString(), any());
 
-        TaskInfo taskInfo = buildTask("pay-center", "PAY-1", "order-flow-001");
+        TaskInfo taskInfo = buildTask("pay-center", "order-flow-001");
         ProcessContext<SendTaskModel> context = buildContext(taskInfo);
 
         sendMqAction.process(context);
@@ -86,11 +83,11 @@ class SendMqActionTest {
     }
 
     @Test
-    // S3/S4: 非白名单业务方必须走普通topic，避免占用有序消费资源
+        // S3/S4: 非白名单业务方必须走普通topic，避免占用有序消费资源
     void shouldRouteToCommonTopicForUnorderedOwner() {
         doNothing().when(sendMqService).send(anyString(), anyString(), anyString(), any());
 
-        TaskInfo taskInfo = buildTask("notice-center", "NOTICE-1", null);
+        TaskInfo taskInfo = buildTask("notice-center", null);
         ProcessContext<SendTaskModel> context = buildContext(taskInfo);
 
         sendMqAction.process(context);
@@ -104,15 +101,15 @@ class SendMqActionTest {
     }
 
     @Test
-    // S5: 同业务链路跨渠道（短信/邮件）发送时，顺序键应保持一致
+        // S5: 同业务链路跨渠道（短信/邮件）发送时，顺序键应保持一致
     void shouldKeepStableOrderKeyAcrossChannelsForSameBiz() {
         doNothing().when(sendMqService).send(anyString(), anyString(), anyString(), any());
 
-        TaskInfo smsTask = buildTask("order-center", "ORDER-5001", null);
+        TaskInfo smsTask = buildTask("order-center", null);
         smsTask.setSendChannel(30);
-        TaskInfo mixedTask = buildTask("order-center", "ORDER-5001", null);
+        TaskInfo mixedTask = buildTask("order-center", null);
         mixedTask.setSendChannel(40);
-        TaskInfo mailTask = buildTask("order-center", "ORDER-5001", null);
+        TaskInfo mailTask = buildTask("order-center", null);
         mailTask.setSendChannel(20);
         SendTaskModel model = SendTaskModel.builder().taskInfo(List.of(smsTask, mixedTask, mailTask)).build();
         ProcessContext<SendTaskModel> context = ProcessContext.<SendTaskModel>builder()
@@ -130,9 +127,9 @@ class SendMqActionTest {
     }
 
     @Test
-    // S6: 发送侧失败时应按配置重试，直到成功或耗尽次数
+        // S6: 发送侧失败时应按配置重试，直到成功或耗尽次数
     void shouldRetryWhenSendFails() {
-        TaskInfo taskInfo = buildTask("order-center", "ORDER-2", null);
+        TaskInfo taskInfo = buildTask("order-center", null);
         ProcessContext<SendTaskModel> context = buildContext(taskInfo);
 
         doThrow(new RuntimeException("first"))
@@ -147,10 +144,10 @@ class SendMqActionTest {
     }
 
     @Test
-    // S13: 消息体超限时必须在入MQ前被拒绝
+        // S13: 消息体超限时必须在入MQ前被拒绝
     void shouldFailWhenPayloadTooLarge() {
         ReflectionTestUtils.setField(sendMqAction, "maxPayloadSizeBytes", 1);
-        TaskInfo taskInfo = buildTask("order-center", "ORDER-3", null);
+        TaskInfo taskInfo = buildTask("order-center", null);
         ProcessContext<SendTaskModel> context = buildContext(taskInfo);
 
         sendMqAction.process(context);
@@ -160,9 +157,9 @@ class SendMqActionTest {
     }
 
     @Test
-    // S14: 边界值校验，消息体大小等于阈值时允许发送
+        // S14: 边界值校验，消息体大小等于阈值时允许发送
     void shouldAllowWhenPayloadSizeEqualsThreshold() {
-        TaskInfo taskInfo = buildTask("order-center", "ORDER-4", null);
+        TaskInfo taskInfo = buildTask("order-center", null);
         String payload = JSON.toJSONString(List.of(taskInfo), JSONWriter.Feature.WriteClassName);
         ReflectionTestUtils.setField(sendMqAction, "maxPayloadSizeBytes", payload.getBytes(StandardCharsets.UTF_8).length);
 
@@ -175,13 +172,12 @@ class SendMqActionTest {
         verify(sendMqService, times(1)).send(anyString(), anyString(), anyString(), any());
     }
 
-    private TaskInfo buildTask(String businessOwner, String bizId, String orderKey) {
+    private TaskInfo buildTask(String businessOwner, String orderKey) {
         return TaskInfo.builder()
-                .messageId("MID-" + bizId)
-                .bizId(bizId)
+                .traceId("MID-" + orderKey)
                 .businessOwner(businessOwner)
-                .orderKey(orderKey)
-                .messageTemplateId(1001L)
+                .orderingKey(orderKey)
+                .templateId(1001L)
                 .sendChannel(20)
                 .build();
     }

@@ -6,13 +6,14 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.base.Throwables;
-import com.mhd.push.common.domain.AnchorInfo;
+import com.mhd.push.common.domain.LogRecord;
 import com.mhd.push.common.domain.RecallTaskInfo;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.dto.account.EnterpriseWeChatRobotAccount;
 import com.mhd.push.common.dto.model.EnterpriseWeChatRobotContentModel;
 import com.mhd.push.common.enums.ChannelType;
 import com.mhd.push.common.enums.SendMessageType;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.handler.domain.wechat.robot.EnterpriseWeChatRobotParam;
 import com.mhd.push.handler.domain.wechat.robot.EnterpriseWeChatRootResult;
 import com.mhd.push.handler.handler.BaseHandler;
@@ -63,8 +64,8 @@ public class EnterpriseWeChatRobotHandler extends BaseHandler {
             if (Integer.valueOf(WxCpErrorMsgEnum.CODE_0.getCode()).equals(weChatRootResult.getErrcode())) {
                 return true;
             }
-            logUtils.print(AnchorInfo.builder().bizId(taskInfo.getBizId()).messageId(taskInfo.getMessageId()).businessId(taskInfo.getBusinessId())
-                    .ids(taskInfo.getReceiver()).state(weChatRootResult.getErrcode()).build());
+            LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, weChatRootResult.getErrcode(), weChatRootResult.getErrmsg());
+            logUtils.print(logRecord);
         } catch (Exception e) {
             log.error("EnterpriseWeChatRobotHandler#handler fail!e:{},params:{}", Throwables.getStackTraceAsString(e), JSON.toJSONString(taskInfo));
         }

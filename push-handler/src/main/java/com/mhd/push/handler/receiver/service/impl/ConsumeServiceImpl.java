@@ -1,9 +1,12 @@
 package com.mhd.push.handler.receiver.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.mhd.push.common.domain.*;
+import com.mhd.push.common.domain.LogParam;
+import com.mhd.push.common.domain.LogRecord;
+import com.mhd.push.common.domain.RecallTaskInfo;
+import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.enums.MsgPushState;
-import com.mhd.push.common.enums.MsgPushTypeEnum;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.handler.handler.HandlerHolder;
 import com.mhd.push.handler.pending.Task;
 import com.mhd.push.handler.pending.TaskPendingHolder;
@@ -15,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zhao-hao-dong
@@ -56,25 +60,20 @@ public class ConsumeServiceImpl implements ConsumeService {
         long currentTimeMillis = System.currentTimeMillis();
         for (TaskInfo taskInfo : taskInfoLists) {
             logReceive(taskInfo, currentTimeMillis);
-            taskPendingHolder.submitOrderly(topicGroupId, resolveOrderKey(taskInfo), context.getBean(Task.class).setTaskInfo(taskInfo));
+            taskPendingHolder.submitOrderly(topicGroupId, buildOrderKey(taskInfo), context.getBean(Task.class).setTaskInfo(taskInfo));
         }
     }
 
-    private String resolveOrderKey(TaskInfo taskInfo) {
-        if (taskInfo == null) {
-            return "default";
-        }
-        if (taskInfo.getOrderKey() != null && !taskInfo.getOrderKey().isBlank()) {
-            return taskInfo.getOrderKey();
-        }
+    private String buildOrderKey(TaskInfo taskInfo) {
+        if (Objects.isNull(taskInfo)) return null;
+        StringBuilder sb = new StringBuilder();
         if (taskInfo.getBusinessOwner() != null && !taskInfo.getBusinessOwner().isBlank()
-                && taskInfo.getBizId() != null && !taskInfo.getBizId().isBlank()) {
-            return taskInfo.getBusinessOwner() + ":" + taskInfo.getBizId();
+                && taskInfo.getOrderingKey() != null && !taskInfo.getOrderingKey().isBlank()) {
+            sb.append(taskInfo.getBusinessOwner())
+                    .append(":")
+                    .append(taskInfo.getOrderingKey());
         }
-        if (taskInfo.getBizId() != null && !taskInfo.getBizId().isBlank()) {
-            return taskInfo.getBizId();
-        }
-        return taskInfo.getMessageId();
+        return sb.toString();
     }
 
     private void logReceive(TaskInfo taskInfo, long currentTimeMillis) {
@@ -83,16 +82,8 @@ public class ConsumeServiceImpl implements ConsumeService {
                 .object(taskInfo)
                 .timestamp(currentTimeMillis)
                 .build();
-        MsgPushLogRequest msgPushLogRequest = MsgPushLogRequest.builder()
-                .bizType(MsgPushTypeEnum.SEND.getCode())
-                .messageId(taskInfo.getMessageId())
-                .messageTemplateId(taskInfo.getMessageTemplateId())
-                .receiver(taskInfo.getReceiver())
-                .state(MsgPushState.RECEIVE.getCode())
-                .stateDescription(MsgPushState.RECEIVE.getDescription())
-                .timestamp(System.currentTimeMillis())
-                .build();
-        logUtils.print(msgPushLogRequest);
+        LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.RECEIVE);
+        logUtils.print(logRecord);
         logUtils.print(logParam);
     }
 

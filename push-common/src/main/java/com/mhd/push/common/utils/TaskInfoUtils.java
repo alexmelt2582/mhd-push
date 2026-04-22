@@ -1,4 +1,4 @@
-package com.mhd.push.support.utils;
+package com.mhd.push.common.utils;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
@@ -18,12 +18,11 @@ public class TaskInfoUtils {
     }
 
     /**
-     * 生成任务唯一Id
-     *
-     * @return
+     * 生成链路ID
+     * @return 唯一ID
      */
-    public static String generateMessageId() {
-        return IdUtil.nanoId();
+    public static String getTraceId() {
+        return UuidGenerator.nextTraceId();
     }
 
     /**

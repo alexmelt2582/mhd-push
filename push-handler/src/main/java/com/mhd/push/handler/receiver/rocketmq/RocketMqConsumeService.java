@@ -75,12 +75,11 @@ public class RocketMqConsumeService {
                                   Exception e, boolean orderly, int currentRetry) {
         TaskInfo first = taskInfoLists.get(0);
         MqDlqRecord record = MqDlqRecord.builder()
-                .messageId(first.getMessageId())
-                .bizId(first.getBizId())
+                .traceId(first.getTraceId())
                 .businessOwner(first.getBusinessOwner())
                 .topic(orderly ? sendOrderlyTopic : sendTopic)
                 .tagId(messageExt.getTags())
-                .orderKey(first.getOrderKey())
+                .orderKey(first.getOrderingKey())
                 .reconsumeTimes(currentRetry)
                 .maxReconsumeTimes(maxReconsumeTimes)
                 .payload(payload)
@@ -89,9 +88,9 @@ public class RocketMqConsumeService {
                 .createdAt(System.currentTimeMillis())
                 .build();
 
-        String recordKey = RedisConstant.buildDlqRecordKey(first.getMessageId());
+        String recordKey = RedisConstant.buildDlqRecordKey(first.getTraceId());
         stringRedisTemplate.opsForValue().set(recordKey, JSON.toJSONString(record), dlqRecordTtlHours, TimeUnit.HOURS);
-        stringRedisTemplate.opsForZSet().add(RedisConstant.DLQ_INDEX_KEY, first.getMessageId(), System.currentTimeMillis());
+        stringRedisTemplate.opsForZSet().add(RedisConstant.DLQ_INDEX_KEY, first.getTraceId(), System.currentTimeMillis());
         return record;
     }
 
@@ -102,7 +101,7 @@ public class RocketMqConsumeService {
         try {
             dlqAlertService.alert(record);
         } catch (Exception alertEx) {
-            log.error("DLQ alert fail, messageId:{}, err:{}", record.getMessageId(), alertEx.getMessage(), alertEx);
+            log.error("DLQ alert fail, messageId:{}, err:{}", record.getTraceId(), alertEx.getMessage(), alertEx);
         }
     }
 }

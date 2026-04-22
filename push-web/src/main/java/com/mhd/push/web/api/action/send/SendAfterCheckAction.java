@@ -3,6 +3,7 @@ package com.mhd.push.web.api.action.send;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ReUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.mhd.push.common.domain.TaskInfo;
 import com.mhd.push.common.enums.ErrorCodeEnum;
 import com.mhd.push.common.enums.IdType;
@@ -11,8 +12,10 @@ import com.mhd.push.common.pipeline.BusinessProcess;
 import com.mhd.push.common.pipeline.ProcessContext;
 import com.mhd.push.web.api.domain.SendTaskModel;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,9 @@ public class SendAfterCheckAction implements BusinessProcess<SendTaskModel> {
      */
     protected static final Map<Integer, String> CHANNEL_REGEX_EXP;
 
+    @Value("${mhd.mq.payload.max-size-bytes:3145728}")
+    private int maxPayloadSizeBytes;
+
     static {
         Map<Integer, String> tempMap = new HashMap<>();
         tempMap.put(IdType.PHONE.getCode(), PHONE_REGEX_EXP);
@@ -44,14 +50,19 @@ public class SendAfterCheckAction implements BusinessProcess<SendTaskModel> {
     @Override
     public void process(ProcessContext<SendTaskModel> context) {
         SendTaskModel sendTaskModel = context.getProcessModel();
-        List<TaskInfo> taskInfo = sendTaskModel.getTaskInfo();
+        List<TaskInfo> taskInfoList = sendTaskModel.getTaskInfo();
 
         // 过滤掉不合法的手机号、邮件
-        filterIllegalReceiver(taskInfo);
-        if (CollUtil.isEmpty(taskInfo)) {
+        filterIllegalReceiver(taskInfoList);
+        if (CollUtil.isEmpty(taskInfoList)) {
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.CLIENT_BAD_PARAMETERS, "手机号或邮箱不合法, 无有效的发送任务"));
         }
 
+        // 验证消息是否超出大小限制
+        String message = JSON.toJSONString(taskInfoList, JSONWriter.Feature.WriteClassName);
+        if (message.getBytes(StandardCharsets.UTF_8).length > maxPayloadSizeBytes) {
+            context.setNeedBreak(true).setResponse(BasicResultVO.fail(ErrorCodeEnum.MESSAGE_PAYLOAD_TOO_LARGE));
+        }
     }
 
     /**
@@ -76,7 +87,7 @@ public class SendAfterCheckAction implements BusinessProcess<SendTaskModel> {
 
             if (CollUtil.isNotEmpty(illegalPhone)) {
                 task.getReceiver().removeAll(illegalPhone);
-                log.error("messageTemplateId:{} find illegal receiver!{}", task.getMessageTemplateId(), JSON.toJSONString(illegalPhone));
+                log.error("messageTemplateId:{} find illegal receiver!{}", task.getTemplateId(), JSON.toJSONString(illegalPhone));
             }
             if (CollUtil.isEmpty(task.getReceiver())) {
                 iterator.remove();

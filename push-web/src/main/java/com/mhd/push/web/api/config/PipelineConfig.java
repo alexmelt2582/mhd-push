@@ -2,13 +2,12 @@ package com.mhd.push.web.api.config;
 
 import com.mhd.push.common.pipeline.ProcessController;
 import com.mhd.push.common.pipeline.ProcessTemplate;
-import com.mhd.push.web.api.enums.BusinessCode;
+import com.mhd.push.common.enums.SendTypeEnum;
 import com.mhd.push.web.api.action.send.SendAfterCheckAction;
 import com.mhd.push.web.api.action.send.SendAssembleAction;
 import com.mhd.push.web.api.action.send.SendMqAction;
 import com.mhd.push.web.api.action.send.SendPreCheckAction;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -73,7 +72,7 @@ public class PipelineConfig {
     public ProcessController apiProcessController() {
         ProcessController processController = new ProcessController();
         Map<String, ProcessTemplate> templateConfig = new HashMap<>(4);
-        templateConfig.put(BusinessCode.COMMON_SEND.getCode(), commonSendTemplate());
+        templateConfig.put(SendTypeEnum.SEND.getCode(), commonSendTemplate());
         //templateConfig.put(BusinessCode.RECALL.getCode(), recallMessageTemplate());
         processController.setTemplateConfig(templateConfig);
         return processController;

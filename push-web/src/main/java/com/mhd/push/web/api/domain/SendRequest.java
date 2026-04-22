@@ -1,5 +1,6 @@
 package com.mhd.push.web.api.domain;
 
+import com.mhd.push.common.enums.SendTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,13 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 发送/撤回接口的参数
  *
  * @author zhao-hao-dong
-
  */
 @Data
 @AllArgsConstructor
@@ -105,24 +104,29 @@ public class SendRequest {
     //private MessageParam messageParam;
 
     /**
-     * 执行业务类型
+     * 发送类型
+     * <p>
      *
+     * @see SendTypeEnum
      * send:发送消息
      * recall:撤回消息
      */
     private String code;
 
     /**
-     * 消息模板Id
-     * 【必填】
-     */
-    private Long messageTemplateId;
-
-    /**
      * 幂等键（建议由调用方生成唯一值）
      */
     private String idempotencyKey;
 
+    /**
+     * 模板ID
+     */
+    private Long templateId;
+
+    /**
+     * 排序Key
+     */
+    private String orderingKey;
 
     /**
      * 消息相关的参数

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 /**
- * 打点信息枚举
+ * 发送状态枚举
  *
  * @author zhao-hao-dong
  */

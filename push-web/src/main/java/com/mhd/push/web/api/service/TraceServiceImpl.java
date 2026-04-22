@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author zhao-hao-dong
-
  */
 @Service
 public class TraceServiceImpl implements TraceService {

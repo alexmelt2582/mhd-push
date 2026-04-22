@@ -10,7 +10,6 @@ import java.util.Map;
 
 /**
  * @author zhao-hao-dong
-
  */
 @Data
 @NoArgsConstructor
@@ -18,11 +17,6 @@ import java.util.Map;
 @Accessors(chain = true)
 @Builder
 public class MessageParam {
-    /**
-     * 业务消息发送Id, 用于链路追踪, 若不存在则生成一个消息Id
-     */
-    private String bizId;
-
     /**
      * 接收者
      * 多个用,逗号号分隔开
@@ -32,10 +26,10 @@ public class MessageParam {
     private String receiver;
 
     /**
-     * 消息内容中的可变部分(占位符替换)
+     * 对应模板中的消息内容中的可变部分(占位符替换)
      * 可选
      */
-    private Map<String, String> variables;
+    private Map<String, String> templateParams;
 
     /**
      * 扩展参数

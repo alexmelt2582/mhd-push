@@ -14,7 +14,7 @@ import com.mhd.push.common.enums.ChannelType;
 import com.mhd.push.common.enums.EnumUtil;
 import com.mhd.push.support.domain.entity.MessageTemplate;
 import com.mhd.push.support.utils.RedisUtils;
-import com.mhd.push.support.utils.TaskInfoUtils;
+import com.mhd.push.common.utils.TaskInfoUtils;
 import com.mhd.push.web.api.domain.TraceResponse;
 import com.mhd.push.web.api.service.TraceService;
 import com.mhd.push.web.domain.dto.DataParam;
