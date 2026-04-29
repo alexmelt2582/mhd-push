@@ -10,12 +10,9 @@
 
     <packaging>pom</packaging>
     <modules>
-        <module>push-common</module>
-        <module>push-support</module>
-        <module>push-web</module>
-        <module>push-cron</module>
-        <module>push-handler</module>
         <module>push-data-house</module>
+        <module>libs</module>
+        <module>apps</module>
     </modules>
 
     <properties>
@@ -51,6 +48,7 @@
         <dynamic-tp-spring-boot-starter-apollo.version>1.2.2-x</dynamic-tp-spring-boot-starter-apollo.version>
         <jasypt.version>3.0.5</jasypt.version>
         <springdoc.version>2.8.14</springdoc.version>
+        <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
         <weixin-java>4.5.3.B</weixin-java>
         <tencentcloud-sdk-java.version>3.1.510</tencentcloud-sdk-java.version>
         <alipay-sdk-java.version>4.39.19.ALL</alipay-sdk-java.version>
@@ -67,14 +65,25 @@
             </dependency>
             <dependency>
                 <groupId>com.mhd</groupId>
-                <artifactId>push-support</artifactId>
+                <artifactId>push-common-doc</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>
                 <groupId>com.mhd</groupId>
-                <artifactId>push-handler</artifactId>
+                <artifactId>push-domain</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.mhd</groupId>
+                <artifactId>push-infra</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mhd</groupId>
+                <artifactId>push-engine</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
 
             <!-- Spring Boot BOM -->
             <dependency>
@@ -174,8 +183,13 @@
             </dependency>
             <dependency>
                 <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
                 <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.therapi</groupId>
+                <artifactId>therapi-runtime-javadoc</artifactId>
+                <version>${therapi-javadoc.version}</version>
             </dependency>
 
             <!--支付宝sdk-->
@@ -243,6 +257,11 @@
                         <target>${java.version}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <annotationProcessorPaths>
+                            <path>
+                                <groupId>com.github.therapi</groupId>
+                                <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+                                <version>${therapi-javadoc.version}</version>
+                            </path>
                             <!-- mapstruct与lombok同时使用的时候必须要加这个，否则某些使用lombok注解的类会在编译的时候报错 -->
                             <!-- 注意：lombok一定要放到mapstruct之前，否则在编译的时候某些字段可能无法被mapstruct正确处理 -->
                             <path>
