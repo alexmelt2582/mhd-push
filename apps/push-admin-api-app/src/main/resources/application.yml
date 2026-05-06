@@ -1,0 +1,79 @@
+# ============================================================
+# Admin API 应用配置
+# 说明：
+# 1. 该应用只承接模板管理、账号管理、运维确认、链路追踪等内部接口。
+# 2. 与 public-api 分离部署后，应拥有独立端口和独立日志目录。
+# ============================================================
+
+server:
+  # 管理后台建议独立端口，便于网关和内网访问策略隔离。
+  port: 8081
+  servlet:
+    context-path: /
+  # undertow 配置
+  undertow:
+    # 请求编码
+    url-charset: utf-8
+    # HTTP post内容的最大大小。当值为-1时，默认值为大小是无限的
+    max-http-post-size: -1
+    # 以下的配置会影响buffer,这些buffer会用于服务器连接的IO操作,有点类似netty的池化内存管理
+    # 每块buffer的空间大小,越小的空间被利用越充分
+    buffer-size: 512
+    # 是否分配的直接内存
+    direct-buffers: true
+    threads:
+      # 设置IO线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个线程
+      io: 8
+      # 阻塞任务线程池, 当执行类似servlet请求阻塞操作, undertow会从这个线程池中取得线程,它的值设置取决于系统的负载
+      worker: 128
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ./logs/push-admin-api
+  level:
+    com.mhd: debug
+    org.springframework: warn
+    org.mybatis.spring.mapper: error
+
+spring:
+  application:
+    name: mhd-push-admin-api
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:classpath:application-infra.yml
+  main:
+    # 允许循环依赖
+    # allow-circular-references: true
+    # 关闭 banner
+    banner-mode: off
+  servlet:
+    multipart:
+      # 开启文件上传
+      enabled: true
+      # 单个文件大小
+      max-file-size: 10MB
+      # 设置总上传的文件大小
+      max-request-size: 20MB
+  mvc:
+    # 设置静态资源路径 防止所有请求都去查静态资源
+    static-path-pattern: /static/**
+    # 请求时间格式化
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+      date: dd/MM/yyyy
+    pathmatch:
+      # 旧项目可能使用 ant_path_matcher，建议使用 path_pattern_parser
+      # 区别1：path_pattern_parser 性能比原先高，预先将路径模式编译为 PathPattern 对象，请求时直接复用编译结果，无需重复解析
+      # 区别2：ant_path_matcher 对于末尾的/不区分，例如：/api/query与/api/query/都可以匹配，path_pattern_parser 严格区分
+      matching-strategy: path_pattern_parser
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true

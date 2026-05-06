@@ -1,0 +1,19 @@
+# ============================================================
+# Admin API 开发环境配置
+# ============================================================
+
+spring:
+  config:
+    import:
+      - optional:classpath:application-infra-dev.yml
+
+mhd:
+  upload:
+    crowd:
+      # 模板人群包上传目录，当前保留旧工程开发默认值；生产环境建议挂载独立存储目录。
+      path: /Users/3y/temp
+
+rocketmq:
+  producer:
+    # 管理后台中的测试发送和补偿触发建议使用独立 producer group。
+    group: admin-api-producer-group
