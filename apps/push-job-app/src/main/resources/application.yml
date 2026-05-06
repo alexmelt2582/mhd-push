@@ -1,0 +1,27 @@
+# ============================================================
+# Job 应用配置
+# 说明：
+# 1. Job 应用只承载 XXL-Job 和补偿、清理、扫描等周期任务。
+# 2. 该应用通常不对外开放业务接口，因此不配置 Web 端口。
+# ============================================================
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ./logs/push-job
+  level:
+    com.mhd: info
+    org.springframework: warn
+    org.mybatis.spring.mapper: error
+
+spring:
+  application:
+    name: mhd-push-job
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:classpath:application-infra.yml
+      - optional:classpath:application-engine.yml
+  main:
+    banner-mode: off

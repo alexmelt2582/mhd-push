@@ -1,0 +1,13 @@
+# ============================================================
+# Job 开发环境配置
+# ============================================================
+
+spring:
+  config:
+    import:
+      - optional:classpath:application-infra-dev.yml
+
+rocketmq:
+  producer:
+    # Job 触发补偿、扫描或定时消息时使用独立 producer group。
+    group: job-producer-group
