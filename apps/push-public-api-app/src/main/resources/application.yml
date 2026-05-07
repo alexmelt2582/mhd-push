@@ -1,0 +1,62 @@
+# ============================================================
+# Public API 应用配置
+# 说明：
+# 1. 该应用只承接对业务方开放的发送接口。
+# 2. 通过 spring.config.import 引入共享基础设施配置，不在本文件重复维护公共参数。
+# ============================================================
+
+server:
+  # Public API 默认对外端口，生产环境可通过外部配置覆盖。
+  port: 8080
+  servlet:
+    # 保持旧工程上下文根路径，减少调用方改造成本。
+    context-path: /
+  undertow:
+    url-charset: utf-8
+    # Public API 面向发送请求，保留旧工程允许大请求体的设置。
+    max-http-post-size: -1
+    buffer-size: 512
+    direct-buffers: true
+    threads:
+      io: 8
+      worker: 256
+
+logging:
+  # 统一使用共享 logback 配置，并将日志输出到 public-api 独立目录。
+  config: classpath:logback-spring.xml
+  file:
+    path: ./logs/push-public-api
+  level:
+    com.mhd: debug
+    org.springframework: warn
+    org.mybatis.spring.mapper: error
+
+spring:
+  application:
+    # 应用名建议与部署单元一一对应，便于配置中心与监控平台区分。
+    name: mhd-push-public-api
+  profiles:
+    # 默认加载 dev，仅用于本地联调；生产环境应由启动参数覆盖。
+    active: dev
+  config:
+    import:
+      # 引入共享基础设施配置，避免重复维护 MyBatis、Jackson、MQ 等参数。
+      - optional:classpath:application-infra.yml
+  main:
+    banner-mode: off
+  mvc:
+    static-path-pattern: /static/**
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+      date: dd/MM/yyyy
+    pathmatch:
+      # 使用新路径匹配器，性能更高且规则更明确。
+      matching-strategy: path_pattern_parser
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    path: /v3/api-docs
+    enabled: true

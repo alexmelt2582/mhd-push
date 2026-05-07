@@ -1,0 +1,16 @@
+# ============================================================
+# Public API 开发环境配置
+# 说明：
+# 1. 本文件只放 public-api 在开发环境下的专属覆盖项。
+# 2. 数据库、Redis、MQ 等公共连接信息从 application-infra-dev.yml 继承。
+# ============================================================
+
+spring:
+  config:
+    import:
+      - optional:classpath:application-infra-dev.yml
+
+rocketmq:
+  producer:
+    # 对外发送接口使用独立 producer group，便于和 worker/job 隔离排查。
+    group: public-api-producer-group
