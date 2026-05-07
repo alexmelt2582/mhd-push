@@ -1,0 +1,6 @@
+{
+  "id": 3005,
+  "name": "微信支付服务号",
+  "sendChannel": 50,
+  "accountConfig": "{\"appId\":\"wx1234567890abcdef\",\"appSecret\":\"gh_a1b2c3d4e5f6...\",\"token\":\"verifyToken123\",\"aesKey\":\"encodingAesKey...\",\"templateId\":\"tmpl_pay_success_01\"}"
+}

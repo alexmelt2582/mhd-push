@@ -1,0 +1,77 @@
+[
+  {
+    "topic": "order_lifecycle_event",
+    "timestamp": 1684742400000,
+    "template_id": "TPL_ECOM_ORDER_STATUS",
+    "ordering_key": "ORDER_20240521_9988",
+    "payload": {
+      "user_id": "USER_88888",
+      "mobile": "13800000000",
+      "template_params": {
+        "order_id": "ORDER_20240521_9988",
+        "status": "已创建（待支付）",
+        "detail_info": "请在30分钟内完成支付。"
+      }
+    }
+  },
+  {
+    "topic": "order_lifecycle_event",
+    "timestamp": 1684742460000,
+    "template_id": "TPL_ECOM_ORDER_STATUS",
+    "ordering_key": "ORDER_20240521_9988",
+    "payload": {
+      "user_id": "USER_88888",
+      "mobile": "13800000000",
+      "template_params": {
+        "order_id": "ORDER_20240521_9988",
+        "status": "已支付",
+        "detail_info": "支付金额：7999.00元，商家正在备货中。"
+      }
+    }
+  },
+  {
+    "topic": "order_lifecycle_event",
+    "timestamp": 1684746000000,
+    "template_id": "TPL_ECOM_ORDER_STATUS",
+    "ordering_key": "ORDER_20240521_9988",
+    "payload": {
+      "user_id": "USER_88888",
+      "mobile": "13800000000",
+      "template_params": {
+        "order_id": "ORDER_20240521_9988",
+        "status": "已发货",
+        "detail_info": "顺丰快递: SF123456789CN"
+      }
+    }
+  },
+  {
+    "topic": "order_lifecycle_event",
+    "timestamp": 1684828800000,
+    "template_id": "TPL_ECOM_ORDER_STATUS",
+    "ordering_key": "ORDER_20240521_9988",
+    "payload": {
+      "user_id": "USER_88888",
+      "mobile": "13800000000",
+      "template_params": {
+        "order_id": "ORDER_20240521_9988",
+        "status": "已完成",
+        "detail_info": "商品已签收，感谢您的购买！"
+      }
+    }
+  },
+  {
+    "topic": "order_lifecycle_event",
+    "timestamp": 1684915200000,
+    "template_id": "TPL_ECOM_ORDER_STATUS",
+    "ordering_key": "ORDER_20240521_9988",
+    "payload": {
+      "user_id": "USER_88888",
+      "mobile": "13800000000",
+      "template_params": {
+        "order_id": "ORDER_20240521_9988",
+        "status": "已评价",
+        "detail_info": "您已获得50积分奖励。"
+      }
+    }
+  }
+]

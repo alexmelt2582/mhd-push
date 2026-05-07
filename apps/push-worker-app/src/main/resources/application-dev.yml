@@ -1,0 +1,31 @@
+# ============================================================
+# Worker 开发环境配置
+# 说明：
+# 1. Worker 在开发环境下需要自己的消费者组，避免与旧单体或其他应用冲突。
+# 2. 这些 group 仅用于开发联调，生产环境应按集群规划统一命名。
+# ============================================================
+
+spring:
+  config:
+    import:
+      - optional:classpath:application-infra-dev.yml
+
+rocketmq:
+  producer:
+    group: worker-producer-group
+
+mhd:
+  upload:
+    crowd:
+      # 模板人群包上传目录，当前保留旧工程开发默认值；生产环境建议挂载独立存储目录。
+      path: /Users/3y/temp
+  mq:
+    rocketmq:
+      consumer:
+        group:
+          # 普通消息消费组。
+          send: worker-send-consumer-group
+          # 顺序消息消费组，必须与普通消息组分离，避免消费语义混淆。
+          send-orderly: worker-orderly-consumer-group
+          # 撤回消息消费组。
+          recall: worker-recall-consumer-group

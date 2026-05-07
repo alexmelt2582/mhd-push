@@ -1,0 +1,11 @@
+{
+  "id": 4,
+  "name": "新版本上线-功能推荐",
+  "idType": 20,
+  "sendChannel": 20,
+  "templateType": 20,
+  "msgType": 20,
+  "shieldType": 30,
+  "msgContent": "{\n  \"content\": \"{$userName}，我们上线了深色模式，快去设置里体验吧！点击领取 {$couponAmount} 元奖励。\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"userName\",\n      \"description\": \"用户名\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"用户\"\n    },\n    {\n      \"key\": \"couponAmount\",\n      \"description\": \"奖励金额\",\n      \"type\": \"number\",\n      \"required\": true,\n      \"defaultValue\": \"1\"\n    }\n  ],\n  \"extra_params_schema\": [\n    {\n      \"key\": \"title\",\n      \"description\": \"推送标题\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"发现新功能！\"\n    },\n    {\n      \"key\": \"url\",\n      \"description\": \"活动跳转链接\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"\"\n    }\n  ]\n}",
+  "sendAccount": 3004
+}

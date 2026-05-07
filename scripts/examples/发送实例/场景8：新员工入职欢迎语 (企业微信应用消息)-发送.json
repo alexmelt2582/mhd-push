@@ -1,0 +1,17 @@
+{
+  "code": "send",
+  "templateId": 8,
+  "messageParam": {
+    "receiver": "zhangsan",
+    "templateParams": {
+      "userName": "张三",
+      "jobNumber": "EMP20260506001",
+      "location": "A座前台",
+      "password": "Init@1234",
+      "sendType": "text"
+    },
+    "extra": {
+      "businessOwner": "HR01"
+    }
+  }
+}

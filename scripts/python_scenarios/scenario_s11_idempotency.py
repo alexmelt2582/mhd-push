@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
-import time
 import urllib.error
 import uuid
 
@@ -24,13 +24,14 @@ from scenario_common import (
 )
 
 
-def build_default_template_content() -> dict:
-    """构造场景默认模板内容。"""
-
-    return {
-        "title": "S11 idempotency notification",
-        "content": "event={$event}; bizId={$bizId}; timestamp={$ts}",
-    }
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "接口幂等验证：{$eventName}",
+        "content": "幂等检查消息，业务键 {$bizId}，事件 {$eventName}，固定时间 {$ts}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
 
 
 def main() -> int:
@@ -45,12 +46,19 @@ def main() -> int:
             args.base_url,
             "s11",
             resources.account_id,
-            build_template_content(args, build_default_template_content()),
+            build_template_content(args, DEFAULT_TEMPLATE_CONTENT_JSON),
             args,
         )
 
-        biz_id = f"IDEMP-{int(time.time() * 1000)}"
+        run_id = uuid.uuid4().hex[:8]
+        biz_id = f"IDEMP-{run_id}"
         idempotency_key = f"S11-{uuid.uuid4().hex}"
+        fixed_variables = {
+            "eventName": "重复提交同一条付款成功通知",
+            "bizId": biz_id,
+            "ts": "2026-04-21T10:00:00Z",
+        }
+        fixed_extra = {"businessOwner": "notice-center", "orderKey": f"notice-center:{biz_id}"}
 
         first = send_message(
             args.base_url,
@@ -58,12 +66,8 @@ def main() -> int:
             args.receiver,
             biz_id,
             idempotency_key,
-            {
-                "event": "idempotency-check",
-                "bizId": biz_id,
-                "ts": str(int(time.time() * 1000)),
-            },
-            {"businessOwner": "notice-center"},
+            fixed_variables,
+            fixed_extra,
         )
         second = send_message(
             args.base_url,
@@ -71,12 +75,8 @@ def main() -> int:
             args.receiver,
             biz_id,
             idempotency_key,
-            {
-                "event": "idempotency-check",
-                "bizId": biz_id,
-                "ts": str(int(time.time() * 1000)),
-            },
-            {"businessOwner": "notice-center"},
+            fixed_variables,
+            fixed_extra,
         )
 
         if str(first.get("code")) != "200":
@@ -88,6 +88,7 @@ def main() -> int:
 
         print(f"[S11] 第一次响应: {first}")
         print(f"[S11] 第二次响应: {second}")
+        print(f"[S11] 两次请求使用完全相同的 payload 与 idempotencyKey，仅允许命中一次真实受理")
         for message_id in extract_message_ids(first):
             trace_result = wait_for_trace(
                 args.base_url,

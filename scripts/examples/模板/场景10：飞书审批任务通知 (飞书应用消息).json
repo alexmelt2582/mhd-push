@@ -1,0 +1,11 @@
+{
+  "id": 10,
+  "name": "待办审批提醒",
+  "idType": 10,
+  "sendChannel": 110,
+  "templateType": 20,
+  "msgType": 10,
+  "shieldType": 10,
+  "msgContent": "{\n  \"content\": \"【待审批】\\n申请人：{$applicant}\\n类型：{$processType}\\n事由：{$reason}\\n金额：{$amount}\\n请点击下方链接处理：{$link}\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"applicant\",\n      \"description\": \"申请人姓名\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"processType\",\n      \"description\": \"审批类型(请假/报销)\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"通用审批\"\n    },\n    {\n      \"key\": \"reason\",\n      \"description\": \"审批事由\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"无\"\n    },\n    {\n      \"key\": \"amount\",\n      \"description\": \"涉及金额\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"link\",\n      \"description\": \"审批详情页链接\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    }\n  ],\n  \"extra_params_schema\": [\n    {\n      \"key\": \"sendType\",\n      \"description\": \"飞书消息发送类型\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"text\"\n    },\n    {\n      \"key\": \"title\",\n      \"description\": \"飞书卡片标题\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"待办审批提醒\"\n    }\n  ]\n}",
+  "sendAccount": 3010
+}

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import concurrent.futures
+import json
 import statistics
 import sys
 import time
@@ -34,16 +35,20 @@ def percentile(values: list[float], ratio: float) -> float:
 
 
 def build_default_template_content() -> dict:
-    return {
-        "title": "qps {$mode}",
-        "content": "biz={$bizId}; trace={$traceId}; owner={$owner}; step={$step}",
-        "url": "https://notify.example.com/{$bizId}",
-    }
+    return json.dumps(
+        {
+            "title": "性能压测：{$mode}",
+            "content": "业务键 {$bizId}，追踪 {$traceId}，业务域 {$owner}，步骤 {$step}",
+            "url": "https://notify.example.com/perf/{$bizId}",
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
 
 
-def send_once(base_url: str, template_id: int, receiver: str, owner: str, mode: str, index: int) -> tuple[float, dict]:
+def send_once(base_url: str, template_id: int, receiver: str, owner: str, mode: str, run_id: str, index: int) -> tuple[float, dict]:
     start = time.perf_counter()
-    biz_id = f"S15-{mode}-{owner}-{index}"
+    biz_id = f"S15-{mode}-{run_id}-{index:04d}"
     order_key = f"{owner}:{biz_id}" if mode == "ordered" else None
     response = send_message(
         base_url,
@@ -54,7 +59,7 @@ def send_once(base_url: str, template_id: int, receiver: str, owner: str, mode: 
         {
             "mode": mode,
             "bizId": biz_id,
-            "traceId": uuid.uuid4().hex,
+            "traceId": f"TRACE-{mode}-{run_id}-{index:04d}",
             "owner": owner,
             "step": str(index),
         },
@@ -66,13 +71,13 @@ def send_once(base_url: str, template_id: int, receiver: str, owner: str, mode: 
     return (time.perf_counter() - start) * 1000, response
 
 
-def run_benchmark(base_url: str, template_id: int, receiver: str, owner: str, mode: str, requests: int, concurrency: int) -> tuple[list[float], list[dict], float]:
+def run_benchmark(base_url: str, template_id: int, receiver: str, owner: str, mode: str, run_id: str, requests: int, concurrency: int) -> tuple[list[float], list[dict], float]:
     latencies: list[float] = []
     responses: list[dict] = []
     started_at = time.perf_counter()
     with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as executor:
         futures = [
-            executor.submit(send_once, base_url, template_id, receiver, owner, mode, index)
+            executor.submit(send_once, base_url, template_id, receiver, owner, mode, run_id, index)
             for index in range(requests)
         ]
         for future in concurrent.futures.as_completed(futures):
@@ -94,6 +99,7 @@ def main() -> int:
 
     resources = ScenarioResources()
     try:
+#         resources.account_id = create_account(args.base_url, args, "s15")
         resources.account_id = create_account(args.base_url, args, "s15")
         resources.template_id = create_template(
             args.base_url,
@@ -104,12 +110,14 @@ def main() -> int:
         )
 
         owner = args.owner if args.mode != "ordered" else "order-center"
+        run_id = uuid.uuid4().hex[:8]
         latencies, responses, total_seconds = run_benchmark(
             args.base_url,
             resources.template_id,
             args.receiver,
             owner,
             args.mode,
+            run_id,
             args.requests,
             args.concurrency,
         )
@@ -142,6 +150,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
+        # python scenario_s15_qps_benchmark.py --receiver 2@qq.com --account-config file:./account-email.json --requests 1 --concurrency 1
         sys.exit(main())
     except urllib.error.HTTPError as exc:
         print(f"[S15] HTTP 错误: {exc.code} {exc.reason}", file=sys.stderr)

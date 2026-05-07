@@ -59,7 +59,7 @@ public class DataTraceServiceImpl implements DataTraceService {
         }
 
         // 0. 按时间排序
-        List<SimpleAnchorInfo> sortAnchorList = userInfoList.stream().map(s -> JSON.parseObject(s, SimpleAnchorInfo.class)).sorted(Comparator.comparing(SimpleAnchorInfo::getTimestamp).reversed()).collect(Collectors.toList());
+        List<SimpleAnchorInfo> sortAnchorList = userInfoList.stream().map(s -> JSON.parseObject(s, SimpleAnchorInfo.class)).sorted(Comparator.comparing(SimpleAnchorInfo::getTimestamp)).collect(Collectors.toList());
         return buildUserTimeLineVo(sortAnchorList);
     }
 
@@ -129,30 +129,56 @@ public class DataTraceServiceImpl implements DataTraceService {
                 continue;
             }
 
-            StringBuilder sb = new StringBuilder();
-            for (SimpleAnchorInfo simpleAnchorInfo : entry.getValue()) {
-                if (MsgPushState.RECEIVE.getCode().equals(simpleAnchorInfo.getState())) {
-                    sb.append(StrPool.CRLF);
-                }
-                String startTime = DateUtil.format(new Date(simpleAnchorInfo.getTimestamp()), DatePattern.NORM_DATETIME_PATTERN);
-                String stateDescription = AnchorStateUtils.getDescriptionByState(messageTemplate.getSendChannel(), simpleAnchorInfo.getState());
+            String detail = entry.getValue().stream()
+                    .sorted(Comparator.comparing(SimpleAnchorInfo::getTimestamp))
+                    .map(simpleAnchorInfo -> buildTimelineLine(messageTemplate, simpleAnchorInfo))
+                    .filter(CharSequenceUtil::isNotBlank)
+                    .collect(Collectors.joining(StrPool.CRLF));
 
-                sb.append(startTime).append(StrPool.C_COLON).append(stateDescription).append("==>");
-            }
-
-            for (String detail : sb.toString().split(StrPool.CRLF)) {
-                if (CharSequenceUtil.isNotBlank(detail)) {
-                    UserTimeLineVo.ItemsVO itemsVO = UserTimeLineVo.ItemsVO.builder()
-                            .businessId(entry.getKey())
-                            .sendType(EnumUtil.getEnumByCode(messageTemplate.getSendChannel(), ChannelType.class).getDescription())
-                            .creator(messageTemplate.getCreator())
-                            .title(messageTemplate.getName())
-                            .detail(detail)
-                            .build();
-                    items.add(itemsVO);
-                }
+            if (CharSequenceUtil.isNotBlank(detail)) {
+                UserTimeLineVo.ItemsVO itemsVO = UserTimeLineVo.ItemsVO.builder()
+                        .businessId(entry.getKey())
+                        .sendType(EnumUtil.getEnumByCode(messageTemplate.getSendChannel(), ChannelType.class).getDescription())
+                        .creator(messageTemplate.getCreator())
+                        .title(messageTemplate.getName())
+                        .detail(detail)
+                        .build();
+                items.add(itemsVO);
             }
         }
         return UserTimeLineVo.builder().items(items).build();
+    }
+
+    /**
+     * 构建 admin 时间线中的单行展示内容。
+     *
+     * @param messageTemplate 消息模板
+     * @param simpleAnchorInfo 埋点信息
+     * @return 时间线单行文本
+     */
+    private String buildTimelineLine(MessageTemplate messageTemplate, SimpleAnchorInfo simpleAnchorInfo) {
+        // 统一先格式化时间，保证时间线按固定格式展示。
+        String startTime = DateUtil.format(new Date(simpleAnchorInfo.getTimestamp()), DatePattern.NORM_DATETIME_PATTERN);
+        // 优先展示链路节点自己写入的说明，没有时再回退到状态枚举描述。
+        String description = CharSequenceUtil.isNotBlank(simpleAnchorInfo.getDescription())
+                ? simpleAnchorInfo.getDescription()
+                : AnchorStateUtils.getDescriptionByState(messageTemplate.getSendChannel(), simpleAnchorInfo.getState());
+        if (CharSequenceUtil.isBlank(description)) {
+            return "";
+        }
+        // 如果存在阶段与结果，则拼出更适合内部排查的结构化链路文本。
+        if (CharSequenceUtil.isNotBlank(simpleAnchorInfo.getStage())) {
+                return startTime
+                    + " "
+                    + "[" + CharSequenceUtil.nullToDefault(simpleAnchorInfo.getLogLevel(), "INFO") + "]"
+                    + " "
+                    + "[" + simpleAnchorInfo.getStage()
+                    + (CharSequenceUtil.isNotBlank(simpleAnchorInfo.getResult()) ? "/" + simpleAnchorInfo.getResult() : "")
+                    + "]"
+                    + " "
+                    + description;
+        }
+        // 旧数据保持兼容展示。
+        return startTime + StrPool.C_COLON + description;
     }
 }

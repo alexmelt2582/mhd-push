@@ -1,0 +1,6 @@
+{
+  "id": 3002,
+  "name": "腾讯云短信-事务通知",
+  "sendChannel": 30,
+  "accountConfig": "{\"provider\":\"Tencent\",\"secretId\":\"AKID...xyz\",\"secretKey\":\"...abc\",\"appId\":1400000000,\"signName\":\"XX商城\",\"sdkAppId\":\"1400000000\"}"
+}

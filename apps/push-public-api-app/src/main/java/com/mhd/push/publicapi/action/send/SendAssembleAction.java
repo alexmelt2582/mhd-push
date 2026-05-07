@@ -77,8 +77,8 @@ public class SendAssembleAction implements BusinessProcess<SendTaskModel> {
             List<TaskInfo> taskInfos = assembleTaskInfo(sendTaskModel, snapshot);
             sendTaskModel.setTaskInfo(taskInfos);
             for (TaskInfo taskInfo : taskInfos) {
-                LogRecord preCheckLogRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_PRE_CHECK_SUCCESS);
-                LogRecord assembleLogRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_ASSEMBLE_SUCCESS);
+                LogRecord preCheckLogRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_PRE_CHECK_MODULE_SUCCESS);
+                LogRecord assembleLogRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_ASSEMBLE_MODULE_SUCCESS);
                 logUtils.print(preCheckLogRecord);
                 logUtils.print(assembleLogRecord);
             }

@@ -1,0 +1,12 @@
+{
+  "template_id": "TPL_MARKETING_CARD",
+  "name": "大促活动左图右文卡片",
+  "platform": "APP_NATIVE_VIEW",
+  "layout": "IMAGE_LEFT_TEXT_RIGHT",
+  "fields": [
+    { "key": "title", "type": "string", "required": true, "description": "" },
+    { "key": "subtitle", "type": "string", "required": false, "description": "" },
+    { "key": "image_url", "type": "url", "required": true, "description": "" },
+    { "key": "jump_url", "type": "deep_link", "required": true, "description": "" }
+  ]
+}

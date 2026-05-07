@@ -1,0 +1,87 @@
+[
+  {
+    "topic": "account_ledger_stream",
+    "timestamp": 1684742500000,
+    "template_id": "TPL_FIN_LEDGER_ALERT",
+    "ordering_key": "ACCT_WALLET_1001",
+    "payload": {
+      "user_openid": "oUser_ABC123",
+      "template_params": {
+        "tail_number": "8888",
+        "action_type": "充值",
+        "amount": "+500.00",
+        "transaction_time": "2023-05-22 10:00:00",
+        "current_balance": "1,500.00",
+        "description": "银行卡快捷充值"
+      }
+    }
+  },
+  {
+    "topic": "account_ledger_stream",
+    "timestamp": 1684743000000,
+    "template_id": "TPL_FIN_LEDGER_ALERT",
+    "ordering_key": "ACCT_WALLET_1001",
+    "payload": {
+      "user_openid": "oUser_ABC123",
+      "template_params": {
+        "tail_number": "8888",
+        "action_type": "消费",
+        "amount": "-120.50",
+        "transaction_time": "2023-05-22 10:10:00",
+        "current_balance": "1,379.50",
+        "description": "在线购买课程"
+      }
+    }
+  },
+  {
+    "topic": "account_ledger_stream",
+    "timestamp": 1684744000000,
+    "template_id": "TPL_FIN_LEDGER_ALERT",
+    "ordering_key": "ACCT_WALLET_1001",
+    "payload": {
+      "user_openid": "oUser_ABC123",
+      "template_params": {
+        "tail_number": "8888",
+        "action_type": "提现",
+        "amount": "-300.00",
+        "transaction_time": "2023-05-22 10:30:00",
+        "current_balance": "1,079.50",
+        "description": "提现至招商银行"
+      }
+    }
+  },
+  {
+    "topic": "account_ledger_stream",
+    "timestamp": 1684745000000,
+    "template_id": "TPL_FIN_LEDGER_ALERT",
+    "ordering_key": "ACCT_WALLET_1001",
+    "payload": {
+      "user_openid": "oUser_ABC123",
+      "template_params": {
+        "tail_number": "8888",
+        "action_type": "扣费",
+        "amount": "-2.00",
+        "transaction_time": "2023-05-22 10:50:00",
+        "current_balance": "1,077.50",
+        "description": "月度账户管理费"
+      }
+    }
+  },
+  {
+    "topic": "account_ledger_stream",
+    "timestamp": 1684746000000,
+    "template_id": "TPL_FIN_LEDGER_ALERT",
+    "ordering_key": "ACCT_WALLET_1001",
+    "payload": {
+      "user_openid": "oUser_ABC123",
+      "template_params": {
+        "tail_number": "8888",
+        "action_type": "退款",
+        "amount": "+50.00",
+        "transaction_time": "2023-05-22 11:00:00",
+        "current_balance": "1,127.50",
+        "description": "取消订单退款"
+      }
+    }
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "id": 8,
+  "name": "新员工入职指引",
+  "idType": 60,
+  "sendChannel": 70,
+  "templateType": 20,
+  "msgType": 10,
+  "shieldType": 10,
+  "msgContent": "{\n  \"content\": \"欢迎加入大家庭，{$userName}！\\n您的工号是：{$jobNumber}。\\n请前往 {$location} 领取办公设备。\\nIT账号初始密码：{$password}\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"userName\",\n      \"description\": \"员工姓名\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"jobNumber\",\n      \"description\": \"员工工号\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"location\",\n      \"description\": \"办理地点\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"前台\"\n    },\n    {\n      \"key\": \"password\",\n      \"description\": \"临时密码\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    }\n  ],\n  \"extra_params_schema\": [\n    {\n      \"key\": \"sendType\",\n      \"description\": \"企业微信消息类型\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"text\"\n    }\n  ]\n}",
+  "sendAccount": 3008
+}

@@ -1,0 +1,6 @@
+{
+  "id": 3004,
+  "name": "极光推送-生产环境",
+  "sendChannel": 20,
+  "accountConfig": "{\"platform\":\"JPush\",\"appKey\":\"4a5b6c7d8e9f0...\",\"masterSecret\":\"e0f1g2h3i4j5...\",\"isProduction\":true,\"pushTime\":\"immediate\"}"
+}

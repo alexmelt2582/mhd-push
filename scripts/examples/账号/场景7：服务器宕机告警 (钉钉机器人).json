@@ -1,0 +1,6 @@
+{
+  "id": 3007,
+  "name": "运维报警群机器人",
+  "sendChannel": 80,
+  "accountConfig": "{\"webhook\":\"https://oapi.dingtalk.com/robot/send?access_token=0987654321abcdef\",\"secret\":\"SECb7...xyz\",\"keyword\":\"警报\"}"
+}

@@ -11,4 +11,14 @@
 
     <artifactId>push-data-house</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.mhd</groupId>
+            <artifactId>push-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mhd</groupId>
+            <artifactId>push-domain</artifactId>
+        </dependency>
+    </dependencies>
 </project>

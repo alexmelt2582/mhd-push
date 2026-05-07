@@ -1,0 +1,67 @@
+[
+  {
+    "msg_id": "LOG_RAND_01",
+    "trace_id": "TRC_LOG_A",
+    "topic": "app_behavior_tracking",
+    "timestamp": 1684750000000,
+    "payload": {
+      "user_id": "USER_GUEST_55",
+      "device_id": "ANDROID_XIAOMI_13",
+      "event_name": "APP_LAUNCH",
+      "page": "SplashScreen",
+      "properties": { "source": "Notification" }
+    }
+  },
+  {
+    "msg_id": "LOG_RAND_02",
+    "trace_id": "TRC_LOG_B",
+    "topic": "app_behavior_tracking",
+    "timestamp": 1684750010000,
+    "payload": {
+      "user_id": "USER_GUEST_55",
+      "device_id": "ANDROID_XIAOMI_13",
+      "event_name": "SEARCH_QUERY",
+      "page": "SearchResult",
+      "properties": { "keyword": "running shoes", "results_count": 120 }
+    }
+  },
+  {
+    "msg_id": "LOG_RAND_03",
+    "trace_id": "TRC_LOG_C",
+    "topic": "app_behavior_tracking",
+    "timestamp": 1684750020000,
+    "payload": {
+      "user_id": "USER_GUEST_55",
+      "device_id": "ANDROID_XIAOMI_13",
+      "event_name": "PRODUCT_VIEW",
+      "page": "ProductDetail",
+      "properties": { "product_id": "SKU_999", "price": 299.00 }
+    }
+  },
+  {
+    "msg_id": "LOG_RAND_04",
+    "trace_id": "TRC_LOG_D",
+    "topic": "app_behavior_tracking",
+    "timestamp": 1684750030000,
+    "payload": {
+      "user_id": "USER_GUEST_55",
+      "device_id": "ANDROID_XIAOMI_13",
+      "event_name": "ADD_TO_CART",
+      "page": "ProductDetail",
+      "properties": { "product_id": "SKU_999", "quantity": 1 }
+    }
+  },
+  {
+    "msg_id": "LOG_RAND_05",
+    "trace_id": "TRC_LOG_E",
+    "topic": "app_behavior_tracking",
+    "timestamp": 1684750100000,
+    "payload": {
+      "user_id": "USER_GUEST_55",
+      "device_id": "ANDROID_XIAOMI_13",
+      "event_name": "APP_BACKGROUND",
+      "page": "CartPage",
+      "properties": { "session_duration_sec": 100 }
+    }
+  }
+]

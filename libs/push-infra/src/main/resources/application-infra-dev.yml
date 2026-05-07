@@ -1,0 +1,54 @@
+# ============================================================
+# 基础设施开发环境配置
+# 说明：
+# 1. 该文件只放开发环境下的数据库、Redis、MQ 等本地资源连接信息。
+# 2. 生产环境请通过环境变量、Nacos 或部署系统覆盖，不要直接提交真实凭据。
+# ============================================================
+
+spring:
+  datasource:
+    name: test
+    # 本地开发数据库连接，迁移后所有需要直连数据库的应用都从这里继承。
+    url: jdbc:mysql://127.0.0.1:3306/mhd_push?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    # 当前保留旧工程中的本地密码，仅用于开发环境；生产环境必须改为外部注入。
+    password: Z4,d.3[j
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      # 初始连接数建议与最小空闲连接数保持一致，减少冷启动抖动。
+      initial-size: 10
+      min-idle: 10
+      # 最大连接数按当前单体迁移前配置保留，后续可按应用职责再下调。
+      max-active: 200
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: false
+      validation-query: SELECT 1
+      poolPreparedStatements: true
+      maxOpenPreparedStatements: 20
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: ym6SLrprcE5VEd9cdU32Dw==
+      database: 15
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3000
+
+rocketmq:
+  # 本地开发默认连接本机 NameServer，生产环境请通过环境变量覆盖。
+  name-server: 127.0.0.1:9876
+
+mhd:
+  nacos:
+    # 开发环境默认关闭远程 Nacos 配置拉取，避免本地联调依赖配置中心。
+    enable: false

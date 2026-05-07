@@ -73,7 +73,7 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
                     // 2. 短暂抖动优先在服务端内部重试，不直接暴露给调用方。
                     sendMqService.send(topic, message, tagId, orderKey);
                     for (TaskInfo taskInfo : taskInfoList) {
-                        LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_MQ_SUCCESS);
+                        LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_MQ_MODULE_SUCCESS);
                         logUtils.print(logRecord);
                     }
                     return;
@@ -96,7 +96,7 @@ public class SendMqAction implements BusinessProcess<SendTaskModel> {
                     , JSON.toJSONString(CollUtil.getFirst(taskInfoList.listIterator())));
             // MQ 投递失败时写入 trace，保留内部排查细节，但不影响外部用户统一失败文案。
             for (TaskInfo taskInfo : taskInfoList) {
-                LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_MQ_FAIL);
+                LogRecord logRecord = LogRecord.build(SendTypeEnum.SEND, taskInfo, MsgPushState.SEND_MQ_MODULE_FAIL);
                 logUtils.print(logRecord);
             }
             context.setNeedBreak(true).setResponse(BasicResultVO.fail(ClientErrorCodeEnum.CLIENT_SEND_CHANNEL_UNAVAILABLE));

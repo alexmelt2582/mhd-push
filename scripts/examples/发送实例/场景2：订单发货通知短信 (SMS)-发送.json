@@ -1,0 +1,15 @@
+{
+  "code": "send",
+  "templateId": 2,
+  "messageParam": {
+    "receiver": "13800000002",
+    "templateParams": {
+      "orderId": "SO202605060001",
+      "expressCompany": "顺丰速运",
+      "trackingNo": "SF1234567890"
+    },
+    "extra": {
+      "businessOwner": "SMS02"
+    }
+  }
+}

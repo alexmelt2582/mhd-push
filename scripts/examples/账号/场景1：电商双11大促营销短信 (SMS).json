@@ -1,0 +1,6 @@
+{
+  "id": 3001,
+  "name": "阿里云短信-营销专用",
+  "sendChannel": 30,
+  "accountConfig": "{\"provider\":\"Aliyun\",\"accessKeyId\":\"LTAI5tQz...xyz\",\"accessKeySecret\":\"9XyZ...abc\",\"signName\":\"XX旗舰店\",\"templateId\":\"SMS_123456789\"}"
+}

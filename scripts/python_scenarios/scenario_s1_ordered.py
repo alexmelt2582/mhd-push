@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 import urllib.error
@@ -24,13 +25,14 @@ from scenario_common import (
 )
 
 
-def build_default_template_content() -> dict:
-    """构造邮箱模板内容，变量名必须与发送时的 variables 对齐。"""
-
-    return {
-        "title": "S1 ordered notification",
-        "content": "event={$event}; bizId={$bizId}; timestamp={$ts}",
-    }
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "订单进度通知：{$eventName}",
+        "content": "您好，订单 {$bizId} 当前节点：{$eventName}，处理时间 {$ts}，详情请查看 {$detailUrl}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
 
 
 def main() -> int:
@@ -42,6 +44,7 @@ def main() -> int:
         ],
     )
     add_common_arguments(parser)
+    parser.add_argument("--biz-id", help="同一条有序业务链路的业务键，不传则自动生成")
     args = parser.parse_args()
 
     resources = ScenarioResources()
@@ -51,33 +54,43 @@ def main() -> int:
             args.base_url,
             "s1",
             resources.account_id,
-            build_template_content(args, build_default_template_content()),
+            build_template_content(args, DEFAULT_TEMPLATE_CONTENT_JSON),
             args,
         )
 
-        biz_id = f"ORDER-1001-{int(time.time() * 1000)}"
-        events = ["cart-success", "order-success", "delivery-success", "receive-success"]
+        run_id = uuid.uuid4().hex[:8]
+        biz_id = args.biz_id or f"ORDER-{run_id}"
+        order_key = f"order-center:{biz_id}"
+        events = [
+            ("cart-locked", "购物车锁单"),
+            ("payment-success", "支付成功"),
+            ("warehouse-shipped", "仓库发货"),
+            ("delivery-signed", "用户签收"),
+        ]
+        base_ts = int(time.time() * 1000)
 
-        for event in events:
+        for index, (event_code, event_name) in enumerate(events):
             response = send_message(
                 args.base_url,
                 resources.template_id,
                 args.receiver,
                 biz_id,
-                f"S1-{uuid.uuid4().hex}",
+                f"S1-{run_id}-{event_code}",
                 {
-                    "event": event,
+                    "eventName": event_name,
                     "bizId": biz_id,
-                    "ts": str(int(time.time() * 1000)),
+                    "ts": str(base_ts + index),
+                    "detailUrl": f"https://order.example.com/orders/{biz_id}?step={event_code}",
                 },
                 {
                     "businessOwner": "order-center",
+                    "orderKey": order_key,
                 },
             )
             if str(response.get("code")) != "200":
-                raise RuntimeError(f"[S1] {event} 发送失败: {response}")
+                raise RuntimeError(f"[S1] {event_code} 发送失败: {response}")
             message_ids = extract_message_ids(response)
-            print(f"[S1] {event} 发送成功: {response}")
+            print(f"[S1] {event_code} 发送成功: {response}")
             for message_id in message_ids:
                 trace_result = wait_for_trace(
                     args.base_url,
@@ -85,7 +98,7 @@ def main() -> int:
                     args.trace_timeout_seconds,
                     args.trace_interval_seconds,
                 )
-                print_trace_result(f"S1 {event}", message_id, trace_result)
+                print_trace_result(f"S1 {event_code}", message_id, trace_result)
     finally:
         cleanup_resources(args.base_url, resources)
 

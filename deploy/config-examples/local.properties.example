@@ -1,0 +1,22 @@
+# ============================================================
+# 本地覆盖配置示例
+# 说明：
+# 1. 该文件不建议直接作为应用 classpath 资源加载，而是作为本地联调样例保留。
+# 2. 其中的规则项通常由运维配置中心、数据库或本地调试脚本覆盖。
+# ============================================================
+
+# 需要强制丢弃的消息 ID 列表。
+discardMsgIds = []
+
+# 去重规则样例：key 由业务方和去重策略组合得到，num/time 分别表示次数和时间窗口。
+deduplicationRule = {"deduplication_10":{"num":100,"time":300},"deduplication_20":{"num":500}}
+
+# 短信脚本权重路由样例，用于按消息类型在多个短信供应商之间分流。
+msgTypeSmsConfig = [{"message_type_10":[{"weights":99,"scriptName":"TencentSmsScript"},{"weights":1,"scriptName":"YunPianSmsScript"}]},{"message_type_20":[{"weights":99,"scriptName":"TencentSmsScript"},{"weights":1,"scriptName":"YunPianSmsScript"}]},{"message_type_30":[{"weights":20,"scriptName":"TencentSmsScript"}]},{"message_type_40":[{"weights":20,"scriptName":"TencentSmsScript"}]},{"message_type_50":[{"weights":20,"scriptName":"LinTongSmsScript"}]}]
+
+# 生产级限流样例：
+# 1. 邮件账号 sendAccount=1001：按账号独立限流。
+# 2. 飞书账号 sendAccount=2001：按 webhook / 账号维度限流。
+# 3. 支付业务 pay-center 使用账号 sendAccount=3001：强调匀速输出，使用漏桶算法。
+# 注意：迁移到生产环境前请替换所有示例账号和业务方标识。
+flowControlRule = {"flow_control_40_1001":{"algorithm":"TOKEN_BUCKET","scope":"CHANNEL_ACCOUNT","qps":8,"perMinute":300,"perDay":5000},"flow_control_110_2001":{"algorithm":"TOKEN_BUCKET","scope":"CHANNEL_ACCOUNT","qps":5,"perMinute":120,"perDay":3000},"flow_control_30_3001_pay-center":{"algorithm":"LEAKY_BUCKET","scope":"CHANNEL_ACCOUNT_TENANT","qps":50,"perMinute":3000,"perDay":100000}}

@@ -1,0 +1,14 @@
+{
+  "template_id": "TPL_FIN_LEDGER_ALERT",
+  "name": "账户资金变动提醒",
+  "platform": "WECHAT_TEMPLATE_MSG",
+  "content_pattern": "您尾号{{tail_number}}的账户发生了一笔{{action_type}}交易。\n金额：{{amount}}\n时间：{{transaction_time}}\n当前余额：{{current_balance}}\n备注：{{description}}",
+  "variables": [
+    { "key": "tail_number", "type": "string" },
+    { "key": "action_type", "type": "string" },
+    { "key": "amount", "type": "currency" },
+    { "key": "transaction_time", "type": "datetime" },
+    { "key": "current_balance", "type": "currency" },
+    { "key": "description", "type": "string" }
+  ]
+}

@@ -19,7 +19,7 @@ import urllib.error
 import urllib.request
 import uuid
 from dataclasses import dataclass
-from typing import Any, Iterable, Sequence
+from typing import Any, Sequence
 
 
 DEFAULT_CREATOR = "mhd"
@@ -230,13 +230,16 @@ def build_account_config(args: argparse.Namespace) -> str:
     return json.dumps(config, ensure_ascii=False, separators=(",", ":"))
 
 
-def build_template_content(args: argparse.Namespace, default_content: dict[str, Any]) -> str:
+def build_template_content(args: argparse.Namespace, default_content: dict[str, Any] | str) -> str:
     """构造最终模板内容 JSON。"""
 
     if args.template_content:
         content = parse_json_object(args.template_content, "template-content")
     else:
-        content = normalize_scalar_strings(default_content)
+        if isinstance(default_content, str):
+            content = parse_json_object(default_content, "default-template-content")
+        else:
+            content = normalize_scalar_strings(default_content)
 
     for override_expression in args.template_content_override:
         apply_override(content, override_expression)
@@ -359,12 +362,12 @@ def send_message(
 
     payload = {
         "code": "send",
-        "messageTemplateId": template_id,
+        "templateId": template_id,
         "idempotencyKey": idempotency_key,
         "messageParam": {
             "bizId": biz_id,
             "receiver": receiver,
-            "variables": variables,
+            "templateParams": variables,
             "extra": extra,
         },
     }
@@ -410,6 +413,7 @@ def print_trace_result(label: str, message_id: str, trace_result: dict) -> None:
 
 def cleanup_resources(base_url: str, resources: ScenarioResources) -> None:
     """统一清理模板和账号。"""
-
-#     delete_template(base_url, resources.template_id)
-#     delete_account(base_url, resources.account_id)
+    try:
+        delete_template(base_url, resources.template_id)
+    finally:
+        delete_account(base_url, resources.account_id)

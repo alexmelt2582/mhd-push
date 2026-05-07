@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 import urllib.error
@@ -24,13 +25,14 @@ from scenario_common import (
 )
 
 
-def build_default_template_content() -> dict:
-    """构造场景默认模板内容。"""
-
-    return {
-        "title": "S13 payload notification",
-        "content": "event={$event}; bizId={$bizId}; blob={$blob}; timestamp={$ts}",
-    }
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "大消息边界验证：{$eventName}",
+        "content": "业务键 {$bizId} 的正文片段 {$blob}，生成时间 {$ts}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
 
 
 def main() -> int:
@@ -46,12 +48,12 @@ def main() -> int:
             args.base_url,
             "s13",
             resources.account_id,
-            build_template_content(args, build_default_template_content()),
+            build_template_content(args, DEFAULT_TEMPLATE_CONTENT_JSON),
             args,
         )
 
-        near_blob = "x" * max(1024, args.large_payload_bytes - 2048)
-        over_blob = "x" * args.large_payload_bytes
+        near_blob = ("<p>订单摘要</p>" * max(128, args.large_payload_bytes // 12))[: max(1024, args.large_payload_bytes - 2048)]
+        over_blob = ("<div>营销活动正文</div>" * max(128, args.large_payload_bytes // 18))[: args.large_payload_bytes]
         biz_id = f"PAYLOAD-{int(time.time() * 1000)}"
 
         near_result = send_message(
@@ -61,7 +63,7 @@ def main() -> int:
             f"{biz_id}-near",
             f"near-{uuid.uuid4().hex}",
             {
-                "event": "near",
+                "eventName": "接近阈值正文",
                 "bizId": f"{biz_id}-near",
                 "blob": near_blob,
                 "ts": str(int(time.time() * 1000)),
@@ -75,7 +77,7 @@ def main() -> int:
             f"{biz_id}-over",
             f"over-{uuid.uuid4().hex}",
             {
-                "event": "over",
+                "eventName": "超出阈值正文",
                 "bizId": f"{biz_id}-over",
                 "blob": over_blob,
                 "ts": str(int(time.time() * 1000)),

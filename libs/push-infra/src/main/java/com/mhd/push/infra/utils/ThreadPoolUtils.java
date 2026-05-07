@@ -1,0 +1,29 @@
+package com.mhd.push.infra.utils;
+
+import com.mhd.push.infra.config.ThreadPoolExecutorShutdownDefinition;
+import org.dromara.dynamictp.core.DtpRegistry;
+import org.dromara.dynamictp.core.executor.DtpExecutor;
+import org.dromara.dynamictp.core.support.ExecutorWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * 线程池工具类
+ *
+ * @author zhao-hao-dong
+ */
+@Component
+public class ThreadPoolUtils {
+    private static final String SOURCE_NAME = "mhd";
+    @Autowired
+    private ThreadPoolExecutorShutdownDefinition shutdownDefinition;
+
+    /**
+     * 1. 将当前线程池 加入到 动态线程池内
+     * 2. 注册 线程池 被Spring管理，优雅关闭
+     */
+    public void register(DtpExecutor dtpExecutor) {
+        DtpRegistry.registerExecutor(new ExecutorWrapper(dtpExecutor), SOURCE_NAME);
+        shutdownDefinition.registryExecutor(dtpExecutor);
+    }
+}

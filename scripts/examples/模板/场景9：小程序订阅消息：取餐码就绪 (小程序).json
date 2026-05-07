@@ -1,0 +1,11 @@
+{
+  "id": 9,
+  "name": "取餐通知-出餐完成",
+  "idType": 40,
+  "sendChannel": 60,
+  "templateType": 20,
+  "msgType": 10,
+  "shieldType": 10,
+  "msgContent": "{\n  \"content\": \"{\\\"thing1\\\":\\\"{$storeName}\\\",\\\"character_string2\\\":\\\"{$orderNo}\\\",\\\"number3\\\":\\\"{$pickupCode}\\\",\\\"thing4\\\":\\\"请尽快前往门店取餐\\\"}\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"storeName\",\n      \"description\": \"门店名称\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"本店\"\n    },\n    {\n      \"key\": \"orderNo\",\n      \"description\": \"订单编号后四位\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"pickupCode\",\n      \"description\": \"取餐号码\",\n      \"type\": \"number\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    }\n  ],\n  \"extra_params_schema\": [\n    {\n      \"key\": \"templateId\",\n      \"description\": \"小程序订阅消息模板ID\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"mini_pickup_ready_template\"\n    },\n    {\n      \"key\": \"page\",\n      \"description\": \"点击消息跳转页面\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"pages/order/detail\"\n    }\n  ]\n}",
+  "sendAccount": 3009
+}

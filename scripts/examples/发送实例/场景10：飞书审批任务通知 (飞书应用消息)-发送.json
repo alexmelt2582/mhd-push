@@ -1,0 +1,19 @@
+{
+  "code": "send",
+  "templateId": 10,
+  "messageParam": {
+    "receiver": "user_approval_10001",
+    "templateParams": {
+      "applicant": "李四",
+      "processType": "报销审批",
+      "reason": "客户差旅报销",
+      "amount": "1280.50",
+      "link": "https://oa.example.com/approval/detail/9001",
+      "sendType": "text",
+      "title": "待办审批提醒"
+    },
+    "extra": {
+      "businessOwner": "FEISHU01"
+    }
+  }
+}

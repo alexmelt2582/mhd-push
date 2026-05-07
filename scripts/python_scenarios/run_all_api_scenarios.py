@@ -6,9 +6,12 @@
 1. S1 有序业务链路
 2. S3/S4 无序业务方
 3. S11 幂等
-4. S13/S14 大消息边界
-5. S9 DLQ 人工补偿
-6. S6 MQ 失败注入（可选）
+4. S12 模板缓存
+5. S13 大消息边界
+6. S14 热点受理
+7. S15 QPS 基准
+8. S9 DLQ 人工补偿
+9. S6 MQ 失败注入（可选）
 
 说明：
 1. 每个场景脚本都是完全自包含的。
@@ -48,6 +51,7 @@ def main() -> int:
     parser.add_argument("--include-mq-failure", action="store_true")
     parser.add_argument("--rocketmq-script-dir", default="./doc/rocketmq")
     parser.add_argument("--large-payload-bytes", default=3300000, type=int)
+    parser.add_argument("--s15-mode", choices=["ingress", "unordered", "ordered"], default="ingress")
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parent
@@ -75,6 +79,7 @@ def main() -> int:
     run_script(root / "scenario_s12_template_cache.py", common_args)
     run_script(root / "scenario_s13_payload.py", common_args + ["--large-payload-bytes", str(args.large_payload_bytes)])
     run_script(root / "scenario_s14_hotspot_acceptance.py", common_args)
+    run_script(root / "scenario_s15_qps_benchmark.py", common_args + ["--mode", args.s15_mode])
     run_script(root / "scenario_s9_dlq_compensate.py", ["--base-url", args.base_url])
 
     if args.include_mq_failure:

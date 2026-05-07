@@ -1,0 +1,32 @@
+# ============================================================
+# 执行引擎共享配置
+# 说明：
+# 1. 该文件只放发送执行链相关配置。
+# 2. 主要供 worker 和 job 应用通过 spring.config.import 引入。
+# ============================================================
+
+mhd:
+  handler:
+    retry:
+      # 第三方渠道调用失败后的应用内重试次数。
+      max-attempts: 3
+      # 重试间隔，单位毫秒。
+      backoff-ms: 200
+    delivery:
+      # 发送中状态在缓存中的保留时间，便于追踪超时未完成的任务。
+      sending-ttl-seconds: 86400
+      # 成功状态保留时间更长，便于业务方回查与管理端追踪。
+      success-ttl-seconds: 604800
+      # 失败状态只需要短期保留，便于快速排查和重试。
+      fail-ttl-seconds: 3600
+      # 待人工确认状态需要保留足够长时间，便于运维介入。
+      pending-confirm-ttl-seconds: 604800
+      # 发送后多长时间仍未确认则进入待确认状态，单位毫秒。
+      pending-confirm-after-ms: 30000
+  senswords:
+    filter:
+      # 是否启用敏感词过滤，默认在开发和生产均开启。
+      enabled: true
+    dict:
+      # 敏感词字典统一由 push-infra 提供资源文件。
+      path: classpath*:data/sensitive-words.txt

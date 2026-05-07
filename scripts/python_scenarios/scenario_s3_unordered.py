@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 import urllib.error
@@ -24,13 +25,14 @@ from scenario_common import (
 )
 
 
-def build_default_template_content() -> dict:
-    """构造场景默认模板内容。"""
-
-    return {
-        "title": "S3 unordered notification",
-        "content": "owner={$owner}; event={$event}; bizId={$bizId}; timestamp={$ts}",
-    }
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "业务通知：{$eventName}",
+        "content": "业务域 {$owner} 发起 {$eventName}，业务键 {$bizId}，生成时间 {$ts}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
 
 
 def main() -> int:
@@ -45,23 +47,29 @@ def main() -> int:
             args.base_url,
             "s3s4",
             resources.account_id,
-            build_template_content(args, build_default_template_content()),
+            build_template_content(args, DEFAULT_TEMPLATE_CONTENT_JSON),
             args,
         )
 
-        for owner in ("notice-center", "growth-center"):
-            biz_id = f"{owner}-{int(time.time() * 1000)}"
+        run_id = uuid.uuid4().hex[:8]
+        owners = (
+            ("notice-center", "账单生成通知"),
+            ("growth-center", "会员营销触达"),
+        )
+        base_ts = int(time.time() * 1000)
+        for index, (owner, event_name) in enumerate(owners):
+            biz_id = f"UNORDERED-{run_id}-{index + 1}"
             response = send_message(
                 args.base_url,
                 resources.template_id,
                 args.receiver,
                 biz_id,
-                f"S3S4-{uuid.uuid4().hex}",
+                f"S3S4-{run_id}-{owner}",
                 {
                     "owner": owner,
-                    "event": "unordered",
+                    "eventName": event_name,
                     "bizId": biz_id,
-                    "ts": str(int(time.time() * 1000)),
+                    "ts": str(base_ts + index),
                 },
                 {
                     "businessOwner": owner,

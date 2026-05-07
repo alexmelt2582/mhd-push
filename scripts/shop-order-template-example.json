@@ -1,0 +1,26 @@
+{
+  "template_id": "TPL_ECOM_ORDER_STATUS",
+  "name": "通用订单状态变更通知",
+  "platform": "SMS_AND_APP_PUSH",
+  "content_pattern": "【商城名称】亲爱的用户，您的订单 {{order_id}} 状态已更新为：{{status}}。{{detail_info}}如有问题请联系客服。",
+  "variables": [
+    {
+      "key": "order_id",
+      "description": "订单编号",
+      "type": "string",
+      "required": false
+    },
+    {
+      "key": "status",
+      "description": "当前状态文本",
+      "type": "string",
+      "required": true
+    },
+    {
+      "key": "detail_info",
+      "description": "补充信息（快递单号/支付金额等）",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

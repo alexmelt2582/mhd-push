@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "name": "双11大促-全场五折召回",
+  "idType": 30,
+  "sendChannel": 30,
+  "templateType": 20,
+  "msgType": 20,
+  "shieldType": 20,
+  "msgContent": "{\n  \"content\": \"【XX商城】亲，您的购物车里的商品降价啦！{$goodsName} 现价仅需 {$price} 元。点击 {$shortUrl} 立即抢购，退订回T\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"goodsName\",\n      \"description\": \"商品名称\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"price\",\n      \"description\": \"促销价格\",\n      \"type\": \"number\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"shortUrl\",\n      \"description\": \"短链接\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    }\n  ],\n  \"extra_params_schema\": []\n}",
+  "sendAccount": 3001
+}

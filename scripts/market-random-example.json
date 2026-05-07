@@ -1,0 +1,72 @@
+[
+  {
+    "topic": "marketing_notification_queue",
+    "timestamp": 1684760000000,
+    "template_id": "TPL_MARKETING_CARD",
+    "payload": {
+      "target_user": "USER_VIP_001",
+      "template_params": {
+        "title": "618大促开启！",
+        "subtitle": "全场五折起",
+        "image_url": "https://cdn.example.com/promo/618_start.jpg",
+        "jump_url": "app://activity/618_main"
+      }
+    }
+  },
+  {
+    "topic": "marketing_notification_queue",
+    "timestamp": 1684760100000,
+    "template_id": "TPL_MARKETING_CARD",
+    "payload": {
+      "target_user": "USER_VIP_001",
+      "template_params": {
+        "title": "优惠券即将过期",
+        "subtitle": "满100减20",
+        "image_url": "https://cdn.example.com/coupon/expiring.jpg",
+        "jump_url": "app://wallet/coupons"
+      }
+    }
+  },
+  {
+    "topic": "marketing_notification_queue",
+    "timestamp": 1684760200000,
+    "template_id": "TPL_MARKETING_CARD",
+    "payload": {
+      "target_user": "USER_VIP_001",
+      "template_params": {
+        "title": "夏季新品上架",
+        "subtitle": "清凉一夏",
+        "image_url": "https://cdn.example.com/new_arrival/summer.jpg",
+        "jump_url": "app://category/summer_wear"
+      }
+    }
+  },
+  {
+    "topic": "marketing_notification_queue",
+    "timestamp": 1684760300000,
+    "template_id": "TPL_MARKETING_CARD",
+    "payload": {
+      "target_user": "USER_VIP_001",
+      "template_params": {
+        "title": "系统维护公告",
+        "subtitle": "今晚23:00开始",
+        "image_url": "https://cdn.example.com/system/maintenance.jpg",
+        "jump_url": "app://settings/notice"
+      }
+    }
+  },
+  {
+    "topic": "marketing_notification_queue",
+    "timestamp": 1684760400000,
+    "template_id": "TPL_MARKETING_CARD",
+    "payload": {
+      "target_user": "USER_VIP_001",
+      "template_params": {
+        "title": "满意度调查",
+        "subtitle": "赢取积分",
+        "image_url": "https://cdn.example.com/survey/banner.jpg",
+        "jump_url": "app://survey/2023_q2"
+      }
+    }
+  }
+]

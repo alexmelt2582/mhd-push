@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import statistics
 import sys
 import time
@@ -26,18 +27,33 @@ from scenario_common import (
 )
 
 
-def build_default_template_content(body_size: int) -> dict:
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "模板缓存验证：{$eventName}",
+        "content": "业务键 {$bizId}，链路 {$traceId}，正文 {$payload}",
+        "url": "https://notify.example.com/cache/{$bizId}/{$traceId}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
+
+
+def build_default_template_content(body_size: int) -> str:
     """构造指定正文规模的邮件模板。"""
 
     repeated_text = "x" * max(64, body_size)
-    return {
-        "title": "cache-check {$event}",
-        "content": f"biz={{$bizId}}; trace={{$traceId}}; payload={repeated_text}",
-        "url": "https://notify.example.com/{$bizId}/{$traceId}",
-    }
+    return json.dumps(
+        {
+            "title": "模板缓存验证：{$eventName}",
+            "content": f"业务键 {{$bizId}}，链路 {{$traceId}}，正文 {repeated_text}",
+            "url": "https://notify.example.com/cache/{$bizId}/{$traceId}",
+        },
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
 
 
-def send_once(base_url: str, template_id: int, receiver: str, marker: str) -> tuple[float, dict]:
+def send_once(base_url: str, template_id: int, receiver: str, marker: str, biz_id: str, trace_id: str) -> tuple[float, dict]:
     """发送单次消息并返回耗时。"""
 
     start = time.perf_counter()
@@ -45,14 +61,14 @@ def send_once(base_url: str, template_id: int, receiver: str, marker: str) -> tu
         base_url,
         template_id,
         receiver,
-        f"S12-{marker}-{int(time.time() * 1000)}",
+        biz_id,
         f"S12-{uuid.uuid4().hex}",
         {
-            "event": marker,
-            "bizId": f"BIZ-{marker}",
-            "traceId": uuid.uuid4().hex,
+            "eventName": marker,
+            "bizId": biz_id,
+            "traceId": trace_id,
         },
-        {"businessOwner": "cache-observer"},
+        {"businessOwner": "cache-observer", "orderKey": f"cache-observer:{biz_id}"},
     )
     cost_ms = (time.perf_counter() - start) * 1000
     return cost_ms, response
@@ -71,6 +87,9 @@ def percentile(values: list[float], ratio: float) -> float:
 def run_case(base_url: str, template_id: int, send_account_id: int, receiver: str, body_size: int, hot_runs: int, args: argparse.Namespace) -> None:
     """运行一个模板规模场景。"""
 
+    biz_id = f"CACHE-BODY-{body_size}"
+    cold_trace_id = f"TRACE-COLD-{body_size}"
+
     update_template(
         base_url,
         template_id,
@@ -79,12 +98,19 @@ def run_case(base_url: str, template_id: int, send_account_id: int, receiver: st
         build_template_content(args, build_default_template_content(body_size)),
         args,
     )
-    cold_cost_ms, cold_response = send_once(base_url, template_id, receiver, f"cold-{body_size}")
+    cold_cost_ms, cold_response = send_once(base_url, template_id, receiver, f"cold-{body_size}", biz_id, cold_trace_id)
 
     hot_costs: list[float] = []
     last_response = cold_response
     for index in range(hot_runs):
-        hot_cost_ms, last_response = send_once(base_url, template_id, receiver, f"hot-{body_size}-{index}")
+        hot_cost_ms, last_response = send_once(
+            base_url,
+            template_id,
+            receiver,
+            f"hot-{body_size}-{index}",
+            biz_id,
+            f"TRACE-HOT-{body_size}-{index}",
+        )
         hot_costs.append(hot_cost_ms)
 
     print(f"[S12] body_size={body_size} cold_ms={cold_cost_ms:.2f} hot_avg_ms={statistics.mean(hot_costs):.2f} hot_p95_ms={percentile(hot_costs, 0.95):.2f}")

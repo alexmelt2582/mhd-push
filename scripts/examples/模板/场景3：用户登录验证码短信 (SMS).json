@@ -1,0 +1,11 @@
+{
+  "id": 3,
+  "name": "通用登录验证码",
+  "idType": 30,
+  "sendChannel": 30,
+  "templateType": 20,
+  "msgType": 30,
+  "shieldType": 10,
+  "msgContent": "{\n  \"content\": \"【XX平台】您的验证码是：{$code}。{$time}分钟内有效，请勿泄露给他人。\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"code\",\n      \"description\": \"6位数字验证码\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"time\",\n      \"description\": \"有效时长\",\n      \"type\": \"number\",\n      \"required\": false,\n      \"defaultValue\": \"5\"\n    }\n  ],\n  \"extra_params_schema\": []\n}",
+  "sendAccount": 3003
+}

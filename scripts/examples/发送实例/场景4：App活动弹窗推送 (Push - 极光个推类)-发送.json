@@ -1,0 +1,16 @@
+{
+  "code": "send",
+  "templateId": 4,
+  "messageParam": {
+    "receiver": "did_10001",
+    "templateParams": {
+      "userName": "Alex",
+      "couponAmount": "20",
+      "title": "发现新功能！",
+      "url": "https://app.example.com/activity/dark-mode"
+    },
+    "extra": {
+      "businessOwner": "PUSH01"
+    }
+  }
+}

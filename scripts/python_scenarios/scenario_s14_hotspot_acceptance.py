@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import json
 import statistics
 import sys
 import time
@@ -26,30 +27,32 @@ from scenario_common import (
 )
 
 
-def build_default_template_content() -> dict:
-    """构造场景默认模板内容。"""
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "热点受理压测：{$eventName}",
+        "content": "业务键 {$bizId}，追踪 {$traceId}，业务域 {$owner}",
+        "url": "https://notify.example.com/hotspot/{$bizId}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
 
-    return {
-        "title": "hotspot {$event}",
-        "content": "biz={$bizId}; trace={$traceId}; owner={$owner}",
-        "url": "https://notify.example.com/{$bizId}",
-    }
 
-
-def send_once(base_url: str, template_id: int, receiver: str, owner: str, index: int) -> tuple[float, dict]:
+def send_once(base_url: str, template_id: int, receiver: str, owner: str, run_id: str, index: int) -> tuple[float, dict]:
     """执行一次真实 /send 调用。"""
 
     start = time.perf_counter()
+    biz_id = f"S14-{run_id}-{index:04d}"
     response = send_message(
         base_url,
         template_id,
         receiver,
-        f"S14-{owner}-{index}-{int(time.time() * 1000)}",
+        biz_id,
         f"S14-{uuid.uuid4().hex}",
         {
-            "event": f"burst-{index}",
-            "bizId": f"BIZ-{index}",
-            "traceId": uuid.uuid4().hex,
+            "eventName": f"热点批次-{index}",
+            "bizId": biz_id,
+            "traceId": f"TRACE-{run_id}-{index:04d}",
             "owner": owner,
         },
         {"businessOwner": owner},
@@ -85,16 +88,17 @@ def main() -> int:
             args.base_url,
             "s14",
             resources.account_id,
-            build_template_content(args, build_default_template_content()),
+            build_template_content(args, DEFAULT_TEMPLATE_CONTENT_JSON),
             args,
         )
 
+        run_id = uuid.uuid4().hex[:8]
         latencies: list[float] = []
         responses: list[dict] = []
         started_at = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.concurrency) as executor:
             futures = [
-                executor.submit(send_once, args.base_url, resources.template_id, args.receiver, args.owner, index)
+                executor.submit(send_once, args.base_url, resources.template_id, args.receiver, args.owner, run_id, index)
                 for index in range(args.requests)
             ]
             for future in concurrent.futures.as_completed(futures):

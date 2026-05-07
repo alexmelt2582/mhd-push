@@ -1,0 +1,6 @@
+{
+  "id": 3009,
+  "name": "点餐小程序-正式账号",
+  "sendChannel": 60,
+  "accountConfig": "{\"appId\":\"wx9876543210fedcba\",\"appSecret\":\"secret_key_for_miniprogram...\",\"templateId\":\"tmpl_pickup_code_ready\"}"
+}

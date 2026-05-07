@@ -1,0 +1,20 @@
+{
+  "code": "send",
+  "templateId": 7,
+  "messageParam": {
+    "receiver": "ops_group",
+    "templateParams": {
+      "serviceName": "order-service",
+      "hostIp": "10.0.12.31",
+      "alertLevel": "CRITICAL",
+      "status": "DOWN",
+      "errorMessage": "java.net.ConnectException: Connection refused",
+      "monitorLink": "https://monitor.example.com/alert/10001",
+      "sendType": "markdown",
+      "title": "生产环境服务器告警"
+    },
+    "extra": {
+      "businessOwner": "OPS01"
+    }
+  }
+}

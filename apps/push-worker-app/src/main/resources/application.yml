@@ -1,0 +1,27 @@
+# ============================================================
+# Worker 应用配置
+# 说明：
+# 1. Worker 负责消费 MQ 并调用执行引擎完成真实发送。
+# 2. 该应用不暴露业务 HTTP 接口，因此不配置 server 端口。
+# ============================================================
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ./logs/push-worker
+  level:
+    com.mhd: debug
+    org.springframework: warn
+    org.mybatis.spring.mapper: error
+
+spring:
+  application:
+    name: mhd-push-worker
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:classpath:application-infra.yml
+      - optional:classpath:application-engine.yml
+  main:
+    banner-mode: off

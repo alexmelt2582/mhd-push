@@ -1,0 +1,128 @@
+# ============================================================
+# 基础设施共享配置
+# 说明：
+# 1. 该文件放在 push-infra 中，供所有应用通过 spring.config.import 引入。
+# 2. 这里只放“跨应用共享”的基础设施配置，不放端口、Swagger、上传目录等应用专属配置。
+# 3. 应用如果需要覆盖某个值，可在自己的 application.yml / application-dev.yml 中重写。
+# ============================================================
+
+spring:
+  jackson:
+    # 全局时间格式，供接口响应和日志结构化输出复用。
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 统一时区，避免不同节点序列化时间不一致。
+    time-zone: GMT+8
+    serialization:
+      # 关闭格式化输出，降低响应体体积。
+      indent_output: false
+      # 允许空 Bean 被序列化，减少旧模型迁移阶段的兼容问题。
+      fail_on_empty_beans: false
+    deserialization:
+      # 忽略未知字段，便于新旧请求模型并行演进。
+      fail_on_unknown_properties: false
+
+mybatis-plus:
+  # 统一 Mapper XML 扫描位置，后续所有 XML 都应迁入 push-infra。
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 类型别名扫描覆盖 infra entity 多个 package 用逗号或者分号分隔
+  typeAliasesPackage: com.mhd.push.infra.persistence.entity;com.mhd.push.domain.model
+  configuration:
+    # 开启下划线到驼峰转换，兼容当前数据库字段命名风格。
+    map-underscore-to-camel-case: true
+    # 更详细的日志输出 会有性能损耗 org.apache.ibatis.logging.stdout.StdOutImpl
+    # 关闭日志记录 (可单纯使用 p6spy 分析) org.apache.ibatis.logging.nologging.NoLoggingImpl
+    # 默认日志输出 org.apache.ibatis.logging.slf4j.Slf4jImpl
+    # 默认关闭 SQL 控制台日志，避免生产环境日志噪音。
+    logImpl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+  #    cache-enabled: false # 关闭缓存
+  #    call-setters-on-nulls: true # 若查询数据时字段值是 null 时，设置为 true 则显示当前字段名
+  #    jdbc-type-for-null: 'null' # 插入数据时，如果有字段为空设置 null
+  global-config:
+    # 关闭 MyBatis Plus 启动 Logo，减少控制台输出。
+    banner: false
+    db-config:
+      # AUTO 自增 NONE 空 INPUT 用户输入 ASSIGN_ID 雪花 ASSIGN_UUID 唯一 UUID
+      id-type: auto
+#      logic-delete-field: deleted # 全局逻辑删除的实体字段名
+#      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+#      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0)
+
+jasypt:
+  encryptor:
+    # 保持与旧工程一致的加密算法，避免历史密文无法解密。
+    algorithm: PBEWithMD5AndDES
+    # 旧工程未使用独立 IV，这里保持兼容。
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
+    # 该密码仅作为本地开发默认值，生产环境必须通过环境变量或配置中心覆盖。
+    password: ${MHD_JASYPT_PASSWORD:QSXRYJNF4510SDCC}
+
+nacos:
+  config:
+    # 配置中心地址支持环境变量覆盖，避免写死到部署镜像中。
+    server-addr: ${mhd.nacos.addr.ip:127.0.0.1}:${mhd.nacos.addr.port:8848}
+    # data-id 和 group 保持旧工程命名，减少配置迁移成本。
+    data-id: ${mhd.nacos.dataId:austin}
+    group: ${mhd.nacos.group:DEFAULT_GROUP}
+
+rocketmq:
+  # NameServer 供 producer 和 consumer 共用。
+  name-server: ${MHD_ROCKETMQ_NAMESRV:127.0.0.1:9876}
+  producer:
+    # 这是默认 producer group，具体应用可按职责覆盖。
+    group: ${MHD_ROCKETMQ_PRODUCER_GROUP:unique-producer-group}
+
+mhd:
+  mq:
+    # 默认消息管道，当前仍以 RocketMQ 为主。
+    pipeline: rocketMq
+    payload:
+      # 消息体大小保护阈值，保留旧工程默认值 3MB。
+      max-size-bytes: 3145728
+    retry:
+      send:
+        # 入 MQ 失败后的发送重试次数。
+        max-attempts: 3
+        # 两次发送重试之间的退避时间，单位毫秒。
+        backoff-ms: 200
+      consume:
+        # MQ 侧最终消费失败前允许的最大重试次数。
+        max-reconsume-times: 3
+    dlq:
+      # 死信记录在缓存中的保留时长，便于运维追踪和补偿。
+      record-ttl-hours: 168
+      alert:
+        # 默认关闭邮件告警，生产环境按需开启并完善邮箱配置。
+        enabled: false
+        throttle-seconds: 300
+        subject-prefix: "[MHD-DLQ]"
+        mail:
+          host: ""
+          port: 25
+          user: ""
+          pass: ""
+          from: ""
+          to: ""
+          ssl-enable: false
+          starttls-enable: false
+    topic:
+      # 普通发送、顺序发送、撤回和链路日志 Topic 保持历史命名，便于平滑迁移。
+      send: austinBusiness
+      send-orderly: austinBusinessOrderly
+      recall: austinRecall
+      log: austinTraceLog
+    tagId:
+      # 当前项目统一使用 mhd 作为 RocketMQ tag。
+      value: mhd
+    rocketmq:
+      orderly:
+        # 是否开启顺序消息发送，按业务方配置决定。
+        enabled: true
+        # 仅命中的业务方走顺序 Topic，多个值用逗号分隔。
+        business-owners: order-center
+  idempotency:
+    # 是否启用请求幂等保护。
+    enabled: true
+    # 分布式锁 TTL，避免重复提交并发写入。
+    lock-ttl-seconds: 10
+    # 幂等结果缓存时间，便于短时间重复请求复用结果。
+    result-ttl-seconds: 300

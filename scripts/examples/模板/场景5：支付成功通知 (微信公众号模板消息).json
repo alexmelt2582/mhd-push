@@ -1,0 +1,11 @@
+{
+  "id": 5,
+  "name": "支付成功提醒",
+  "idType": 40,
+  "sendChannel": 50,
+  "templateType": 20,
+  "msgType": 10,
+  "shieldType": 10,
+  "msgContent": "{\n  \"content\": \"{\\\"first\\\":\\\"购买成功！\\\",\\\"keyword1\\\":\\\"{$productName}\\\",\\\"keyword2\\\":\\\"{$amount}\\\",\\\"keyword3\\\":\\\"{$payTime}\\\",\\\"remark\\\":\\\"感谢您的惠顾。\\\"}\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"productName\",\n      \"description\": \"商品名称\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"amount\",\n      \"description\": \"支付金额\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"payTime\",\n      \"description\": \"支付时间\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    }\n  ],\n  \"extra_params_schema\": [\n    {\n      \"key\": \"templateId\",\n      \"description\": \"公众号模板ID\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"wx_pay_success_template\"\n    },\n    {\n      \"key\": \"url\",\n      \"description\": \"点击消息跳转链接\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"miniProgramId\",\n      \"description\": \"跳转小程序AppId\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"path\",\n      \"description\": \"跳转小程序路径\",\n      \"type\": \"string\",\n      \"required\": false,\n      \"defaultValue\": \"\"\n    }\n  ]\n}",
+  "sendAccount": 3005
+}

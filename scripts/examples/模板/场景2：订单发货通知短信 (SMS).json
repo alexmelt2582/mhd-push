@@ -1,0 +1,11 @@
+{
+  "id": 2,
+  "name": "电商订单发货通知",
+  "idType": 30,
+  "sendChannel": 30,
+  "templateType": 20,
+  "msgType": 10,
+  "shieldType": 10,
+  "msgContent": "{\n  \"content\": \"【XX快递】您的订单 {$orderId} 已发货，快递公司：{$expressCompany}，单号：{$trackingNo}，请留意签收。\",\n  \"content_params_schema\": [\n    {\n      \"key\": \"orderId\",\n      \"description\": \"订单编号\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"expressCompany\",\n      \"description\": \"快递公司名称\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    },\n    {\n      \"key\": \"trackingNo\",\n      \"description\": \"快递单号\",\n      \"type\": \"string\",\n      \"required\": true,\n      \"defaultValue\": \"\"\n    }\n  ],\n  \"extra_params_schema\": []\n}",
+  "sendAccount": 3002
+}

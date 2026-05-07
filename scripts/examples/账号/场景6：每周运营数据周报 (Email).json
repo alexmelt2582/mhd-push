@@ -1,0 +1,6 @@
+{
+  "id": 3006,
+  "name": "SendGrid邮件服务",
+  "sendChannel": 40,
+  "accountConfig": "{\"provider\":\"SendGrid\",\"apiKey\":\"SG.xxxxxxxxxxxxxx.yyyyyyyyyyyyyyyy\",\"fromEmail\":\"report@company.com\",\"fromName\":\"数据中心\"}"
+}

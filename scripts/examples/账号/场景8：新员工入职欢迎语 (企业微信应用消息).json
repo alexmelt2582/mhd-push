@@ -1,0 +1,6 @@
+{
+  "id": 3008,
+  "name": "企业微信-人事助手",
+  "sendChannel": 70,
+  "accountConfig": "{\"corpId\":\"ww1234567890\",\"agentId\":1000002,\"appSecret\":\"...xyz...\",\"token\":\"...\",\"encodingAesKey\":\"...\"}"
+}

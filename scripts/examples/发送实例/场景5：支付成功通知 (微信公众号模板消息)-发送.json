@@ -1,0 +1,19 @@
+{
+  "code": "send",
+  "templateId": 5,
+  "messageParam": {
+    "receiver": "openid_user_10001",
+    "templateParams": {
+      "productName": "Air Pro 4 耳机",
+      "amount": "￥699.00",
+      "payTime": "2026-05-06 16:30:00",
+      "templateId": "wx_pay_success_template",
+      "url": "https://m.example.com/order/detail/SO202605060009",
+      "miniProgramId": "wx1234567890abcd",
+      "path": "pages/order/detail?id=SO202605060009"
+    },
+    "extra": {
+      "businessOwner": "WXOA01"
+    }
+  }
+}

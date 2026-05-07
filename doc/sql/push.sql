@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `message_template`
     `template_type`    TINYINT(4)    NOT NULL DEFAULT '0' COMMENT '10.运营类 20.技术类接口调用',
     `msg_type`         TINYINT(4)    NOT NULL DEFAULT '0' COMMENT '10.通知类消息 20.营销类消息 30.验证码类消息',
     `shield_type`      TINYINT(4)    NOT NULL DEFAULT '0' COMMENT '10.夜间不屏蔽 20.夜间屏蔽 30.夜间屏蔽(次日早上9点发送)',
-    `msg_content`      VARCHAR(4096) NOT NULL DEFAULT '' COMMENT '消息内容 占位符用{$var}表示',
+    `msg_content`      VARCHAR(4096) NOT NULL DEFAULT '' COMMENT '模板内容定义(JSON)，占位符用{$var}标识包含content、content_params_schema、extra_params_schema',
     `send_account`     INT(10)       NOT NULL DEFAULT '0' COMMENT '发送账号 一个渠道下可存在多个账号',
     `creator`          VARCHAR(45)   NOT NULL DEFAULT '' COMMENT '创建者',
     `updator`          VARCHAR(45)   NOT NULL DEFAULT '' COMMENT '更新者',

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 import time
@@ -26,13 +27,14 @@ from scenario_common import (
 )
 
 
-def build_default_template_content() -> dict:
-    """构造场景默认模板内容。"""
-
-    return {
-        "title": "S6 mq failure notification",
-        "content": "event={$event}; bizId={$bizId}; timestamp={$ts}",
-    }
+DEFAULT_TEMPLATE_CONTENT_JSON = json.dumps(
+    {
+        "title": "MQ 可用性验证：{$eventName}",
+        "content": "业务键 {$bizId} 在阶段 {$eventName} 进行发送验证，时间 {$ts}",
+    },
+    ensure_ascii=False,
+    separators=(",", ":"),
+)
 
 
 def run_batch_script(script_path: Path) -> None:
@@ -58,11 +60,13 @@ def main() -> int:
             args.base_url,
             "s6",
             resources.account_id,
-            build_template_content(args, build_default_template_content()),
+            build_template_content(args, DEFAULT_TEMPLATE_CONTENT_JSON),
             args,
         )
 
-        biz_id = f"MQFAIL-{int(time.time() * 1000)}"
+        run_id = uuid.uuid4().hex[:8]
+        biz_id = f"MQFAIL-{run_id}"
+        base_ts = int(time.time() * 1000)
 
         print("[S6] 停止 RocketMQ，开始故障注入")
         run_batch_script(stop_script)
@@ -73,13 +77,13 @@ def main() -> int:
             resources.template_id,
             args.receiver,
             biz_id,
-            f"S6-mq-down-{uuid.uuid4().hex}",
+            f"S6-mq-down-{run_id}",
             {
-                "event": "mq-down",
+                "eventName": "MQ停机",
                 "bizId": biz_id,
-                "ts": str(int(time.time() * 1000)),
+                "ts": str(base_ts),
             },
-            {"businessOwner": "order-center"},
+            {"businessOwner": "order-center", "orderKey": f"order-center:{biz_id}"},
         )
         fail_code = str(fail_result.get("code"))
         if fail_code not in {"B0001", "-1", "500"}:
@@ -94,14 +98,14 @@ def main() -> int:
             args.base_url,
             resources.template_id,
             args.receiver,
-            biz_id + "-recover",
-            f"S6-mq-up-{uuid.uuid4().hex}",
+            biz_id,
+            f"S6-mq-up-{run_id}",
             {
-                "event": "mq-up",
-                "bizId": biz_id + "-recover",
-                "ts": str(int(time.time() * 1000)),
+                "eventName": "MQ恢复",
+                "bizId": biz_id,
+                "ts": str(base_ts + 1),
             },
-            {"businessOwner": "order-center"},
+            {"businessOwner": "order-center", "orderKey": f"order-center:{biz_id}"},
         )
         if str(recover_result.get("code")) != "200":
             raise RuntimeError(f"[S6] MQ恢复后发送失败: {recover_result}")

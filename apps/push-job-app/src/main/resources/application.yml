@@ -10,7 +10,7 @@ logging:
   file:
     path: ./logs/push-job
   level:
-    com.mhd: info
+    com.mhd: debug
     org.springframework: warn
     org.mybatis.spring.mapper: error
 

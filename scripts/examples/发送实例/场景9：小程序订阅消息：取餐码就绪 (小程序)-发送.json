@@ -1,0 +1,17 @@
+{
+  "code": "send",
+  "templateId": 9,
+  "messageParam": {
+    "receiver": "openid_pickup_10001",
+    "templateParams": {
+      "storeName": "望京 SOHO 店",
+      "orderNo": "A1024",
+      "pickupCode": "58",
+      "templateId": "mini_pickup_ready_template",
+      "page": "pages/order/detail?id=A1024"
+    },
+    "extra": {
+      "businessOwner": "MINI01"
+    }
+  }
+}

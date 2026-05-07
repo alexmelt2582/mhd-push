@@ -1,0 +1,14 @@
+{
+  "code": "send",
+  "templateId": 3,
+  "messageParam": {
+    "receiver": "13800000003",
+    "templateParams": {
+      "code": "824611",
+      "time": "10"
+    },
+    "extra": {
+      "businessOwner": "SMS03"
+    }
+  }
+}
