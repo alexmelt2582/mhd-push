@@ -34,9 +34,9 @@ public interface MessageTemplateService extends IService<MessageTemplate> {
      * 新增模板信息
      *
      * @param messageTemplateSaveDTO 模板信息
-     * @return 结果
+     * @return 新增后的模板ID，失败时返回 null
      */
-    int insertTemplate(MessageTemplateSaveDTO messageTemplateSaveDTO);
+    Long insertTemplate(MessageTemplateSaveDTO messageTemplateSaveDTO);
 
     /**
      * 修改模板信息

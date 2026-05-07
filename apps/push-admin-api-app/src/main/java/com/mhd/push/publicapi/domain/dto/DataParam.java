@@ -36,6 +36,4 @@ public class DataParam {
      * 日期时间(检索短信的条件使用)
      */
     private Long dateTime;
-
-
 }

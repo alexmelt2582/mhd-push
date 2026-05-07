@@ -7,18 +7,18 @@ import cn.hutool.core.util.IdUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.base.Throwables;
-import com.mhd.push.publicapi.utils.LoginUtils;
-import com.mhd.push.common.exception.BusinessException;
 import com.mhd.push.common.enums.ErrorCodeEnum;
-import com.mhd.push.infra.mybatis.domain.PageParam;
+import com.mhd.push.common.exception.BusinessException;
 import com.mhd.push.common.respnsedata.BaseResponse;
 import com.mhd.push.common.respnsedata.BaseResultUtils;
+import com.mhd.push.infra.mybatis.domain.PageParam;
 import com.mhd.push.infra.mybatis.domain.PageResponse;
 import com.mhd.push.infra.mybatis.domain.PageResultUtils;
 import com.mhd.push.infra.persistence.entity.MessageTemplate;
 import com.mhd.push.publicapi.domain.dto.MessageTemplateParam;
 import com.mhd.push.publicapi.domain.dto.MessageTemplateSaveDTO;
 import com.mhd.push.publicapi.service.MessageTemplateService;
+import com.mhd.push.publicapi.utils.LoginUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/messageTemplate")
 @Validated
-public class MessageTemplateController extends BaseController{
+public class MessageTemplateController extends BaseController {
     @Resource
     private LoginUtils loginUtils;
     @Resource
@@ -51,11 +51,11 @@ public class MessageTemplateController extends BaseController{
     private String dataPath;
 
     /**
-        * 分页查询模板列表。
-        *
-        * @param pageParam 分页参数
-        * @param messageTemplateParam 查询条件
-        * @return 分页结果
+     * 分页查询模板列表。
+     *
+     * @param pageParam            分页参数
+     * @param messageTemplateParam 查询条件
+     * @return 分页结果
      */
     @GetMapping("/page")
     public PageResponse<MessageTemplate> queryList(@Valid PageParam pageParam, @Valid MessageTemplateParam messageTemplateParam) {
@@ -81,11 +81,15 @@ public class MessageTemplateController extends BaseController{
      * 新增模板。
      *
      * @param messageTemplateSaveDTO 模板保存参数
-     * @return 执行结果
+     * @return 新增后的模板ID
      */
     @PostMapping("/add")
-    public BaseResponse<Void> add(@RequestBody MessageTemplateSaveDTO messageTemplateSaveDTO) {
-        return toAjax(messageTemplateService.insertTemplate(messageTemplateSaveDTO));
+    public BaseResponse<Long> add(@RequestBody MessageTemplateSaveDTO messageTemplateSaveDTO) {
+        Long templateId = messageTemplateService.insertTemplate(messageTemplateSaveDTO);
+        if (templateId == null) {
+            return BaseResultUtils.error();
+        }
+        return BaseResultUtils.successOfData(templateId);
     }
 
     /**
@@ -119,13 +123,14 @@ public class MessageTemplateController extends BaseController{
             @NotNull(message = "模板ID不能为空") Long id,
             @NotBlank(message = "接收者不能为空") String receiver,
             @NotBlank(message = "消息内容不能为空") String msgContent
-    ) {}
+    ) {
+    }
 
     /**
-         * 模板测试发送接口。
-         *
-         * @param record 测试发送参数
-         * @return 执行结果
+     * 模板测试发送接口。
+     *
+     * @param record 测试发送参数
+     * @return 执行结果
      */
     @PostMapping("/test")
     public BaseResponse<Void> test(@RequestBody @Valid MessageTemplateTestRecord record) {

@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -22,9 +21,9 @@ import com.mhd.push.infra.mybatis.domain.PageParam;
 import com.mhd.push.infra.mybatis.util.MybatisPlusUtils;
 import com.mhd.push.infra.persistence.entity.MessageTemplate;
 import com.mhd.push.infra.persistence.mapper.MessageTemplateMapper;
+import com.mhd.push.infra.service.MessageTemplateCacheService;
 import com.mhd.push.publicapi.domain.dto.MessageTemplateParam;
 import com.mhd.push.publicapi.domain.dto.MessageTemplateSaveDTO;
-import com.mhd.push.publicapi.service.MessageTemplateCacheService;
 import com.mhd.push.publicapi.service.MessageTemplateService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -77,11 +76,11 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
      * 新增模板。
      *
      * @param messageTemplateSaveDTO 模板保存参数
-     * @return 影响行数
+     * @return 新增后的模板ID，失败时返回 null
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertTemplate(MessageTemplateSaveDTO messageTemplateSaveDTO) {
+    public Long insertTemplate(MessageTemplateSaveDTO messageTemplateSaveDTO) {
         MessageTemplate messageTemplate = BeanUtil.toBean(messageTemplateSaveDTO, MessageTemplate.class);
         messageTemplate.setFlowId(CharSequenceUtil.EMPTY)
                 .setMsgStatus(MessageStatus.INIT.getCode()).setAuditStatus(AuditStatus.WAIT_AUDIT.getCode())
@@ -95,8 +94,9 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
         int result = baseMapper.insert(messageTemplate);
         if (result > 0) {
             messageTemplateCacheService.refresh(messageTemplate);
+            return messageTemplate.getId();
         }
-        return result;
+        return null;
     }
 
     /**

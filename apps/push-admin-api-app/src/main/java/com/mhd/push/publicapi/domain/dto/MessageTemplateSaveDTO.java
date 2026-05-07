@@ -1,9 +1,6 @@
 package com.mhd.push.publicapi.domain.dto;
 
-import com.mhd.push.domain.model.template.TemplateVariableDefinition;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * 模板保存请求。
@@ -49,11 +46,6 @@ public class MessageTemplateSaveDTO {
      * 消息内容 占位符用{$var}表示
      */
     private String msgContent;
-
-    /**
-     * 模板变量定义，支持声明必填/非必填。
-     */
-    private List<TemplateVariableDefinition> variables;
 
     /**
      * 发送账号 一个渠道下可存在多个账号
