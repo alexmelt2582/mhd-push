@@ -34,3 +34,4 @@ build/
 ### Mac OS ###
 .DS_Store
 /logs/
+/deploy/rocketmq/rocketmq-all-5.4.0-bin-release.zip

@@ -17,6 +17,7 @@
         <module>push-infra</module>
         <module>push-engine</module>
         <module>push-common-doc</module>
+        <module>push-common-mybatis</module>
     </modules>
 
 </project>
