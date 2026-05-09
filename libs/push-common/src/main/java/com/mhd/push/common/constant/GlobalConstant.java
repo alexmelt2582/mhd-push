@@ -5,6 +5,11 @@ package com.mhd.push.common.constant;
  */
 public interface GlobalConstant {
     /**
+     * 排除敏感属性字段
+     */
+    String[] EXCLUDE_PROPERTIES = { "password", "oldPassword", "newPassword", "confirmPassword" };
+
+    /**
      * businessId默认的长度
      * 生成的逻辑：com.java3y.austin.support.utils.TaskInfoUtils#generateBusinessId(java.lang.Long, java.lang.Integer)
      */

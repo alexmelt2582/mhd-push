@@ -1,4 +1,4 @@
-package com.mhd.push.publicapi.filter;
+package com.mhd.push.common.web.filter;
 
 import cn.hutool.core.io.IoUtil;
 import jakarta.servlet.ReadListener;
@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
  * 构建可重复读取inputStream的request
  *
  * @author zhao-hao-dong
-
  **/
 public class RepeatedlyRequestWrapper extends HttpServletRequestWrapper {
     private final byte[] body;

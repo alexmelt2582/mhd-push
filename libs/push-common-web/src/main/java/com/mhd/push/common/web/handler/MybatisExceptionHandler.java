@@ -1,4 +1,4 @@
-package com.mhd.push.publicapi.exception;
+package com.mhd.push.common.web.handler;
 
 import cn.hutool.http.HttpStatus;
 import com.mhd.push.common.respnsedata.BaseResponse;
@@ -11,12 +11,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * Public API 的 MyBatis 异常处理器。
+ * MyBatis 异常处理器。
+ *
+ * @author zhao-hao-dong
  */
 @Slf4j
 @RestControllerAdvice
 public class MybatisExceptionHandler {
-
     /**
      * 处理主键或唯一索引冲突异常。
      *

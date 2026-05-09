@@ -1,4 +1,4 @@
-package com.mhd.push.publicapi.filter;
+package com.mhd.push.common.web.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

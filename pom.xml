@@ -37,6 +37,7 @@
         <mybatis-plus.version>3.5.14</mybatis-plus.version>
 
         <!-- 工具类库版本 -->
+        <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
         <lombok.version>1.18.30</lombok.version>
         <fastjson2.version>2.0.43</fastjson2.version>
         <hutool.version>5.8.40</hutool.version>
@@ -75,6 +76,11 @@
             </dependency>
             <dependency>
                 <groupId>com.mhd</groupId>
+                <artifactId>push-common-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mhd</groupId>
                 <artifactId>push-domain</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -88,7 +94,6 @@
                 <artifactId>push-engine</artifactId>
                 <version>${revision}</version>
             </dependency>
-
 
             <!-- Spring Boot BOM -->
             <dependency>
@@ -129,6 +134,11 @@
             </dependency>
 
             <!-- 工具类相关 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>transmittable-thread-local</artifactId> <!-- 解决 ThreadLocal 父子线程的传值问题 -->
+                <version>${transmittable-thread-local.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>

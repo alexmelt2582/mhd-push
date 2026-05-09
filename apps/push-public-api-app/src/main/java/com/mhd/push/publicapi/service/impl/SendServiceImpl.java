@@ -140,6 +140,9 @@ public class SendServiceImpl implements SendService {
                     .response(BasicResultVO.success()).build();
 
             ProcessContext<SendTaskModel> process = processController.process(context);
+            if(!ErrorCodeEnum.SUCCESS.getCode().equals(process.getResponse().getStatus())) {
+                throw new ClientBusinessException(process.getResponse().getStatus(), process.getResponse().getMsg());
+            }
             List<SendResultVO> newSendResultVOList = buildSendResultVo(process.getProcessModel());
             requestIdempotencyService.onSuccess(idempotencyKey, newSendResultVOList, uuid);
             log.info("SendService#send succeed, idempotencyKey={}, request={}, response={}", idempotencyKey, sendRequest, newSendResultVOList);
@@ -186,8 +189,10 @@ public class SendServiceImpl implements SendService {
                     .processModel(sendTaskModel)
                     .needBreak(false)
                     .response(BasicResultVO.success()).build();
-
             ProcessContext<SendTaskModel> process = processController.process(context);
+            if(!ErrorCodeEnum.SUCCESS.getCode().equals(process.getResponse().getStatus())) {
+                throw new ClientBusinessException(process.getResponse().getStatus(), process.getResponse().getMsg());
+            }
             List<SendResultVO> newSendResultVOList = buildSendResultVo(process.getProcessModel());
             requestIdempotencyService.onSuccess(idempotencyKey, newSendResultVOList, uuid);
             return newSendResultVOList;

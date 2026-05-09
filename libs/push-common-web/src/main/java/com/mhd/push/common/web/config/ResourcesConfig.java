@@ -1,8 +1,10 @@
-package com.mhd.push.publicapi.config;
+package com.mhd.push.common.web.config;
 
-import com.mhd.push.publicapi.interceptor.PlusWebInvokeTimeInterceptor;
+import com.mhd.push.common.web.handler.GlobalExceptionHandler;
+import com.mhd.push.common.web.handler.MybatisExceptionHandler;
+import com.mhd.push.common.web.interceptor.PlusWebInvokeTimeInterceptor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -10,9 +12,11 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
+ * 通用配置
+ *
  * @author zhao-hao-dong
- **/
-@Configuration
+ */
+@AutoConfiguration
 public class ResourcesConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -40,5 +44,21 @@ public class ResourcesConfig implements WebMvcConfigurer {
         source.registerCorsConfiguration("/**", config);
         // 返回新的CorsFilter
         return new CorsFilter(source);
+    }
+
+    /**
+     * 全局异常处理器
+     */
+    @Bean
+    public GlobalExceptionHandler globalExceptionHandler() {
+        return new GlobalExceptionHandler();
+    }
+
+    /**
+     * Mybatis处理器
+     */
+    @Bean
+    public MybatisExceptionHandler mybatisExceptionHandler() {
+        return new MybatisExceptionHandler();
     }
 }
