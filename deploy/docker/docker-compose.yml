@@ -1,0 +1,26 @@
+services:
+  # =========================================
+  # 1. Redis 缓存与消息队列服务
+  # -----------------------------------------
+  # 作用：
+  #   - 缓存：存储 Session、临时数据，提升系统性能
+  #   - 消息队列：利用 Redis Stream 实现异步任务处理（如简历分析、文档向量化）
+  #
+  # 教程知识点：
+  #   - 在轻量级架构中，Redis Stream 是 Kafka/RabbitMQ 的优秀替代方案，运维成本更低。
+  # =========================================
+  redis:
+    image: redis:7
+    container_name: mhd-push
+    restart: always
+    ports:
+      - "6389:6379"
+    volumes:
+      - .\docker-data\redis\data:/data
+      - .\docker-data\redis\conf:/etc/redis
+    command: redis-server /etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

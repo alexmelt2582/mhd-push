@@ -4,16 +4,15 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.IdUtil;
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.google.common.base.Throwables;
 import com.mhd.push.common.enums.ErrorCodeEnum;
 import com.mhd.push.common.exception.BusinessException;
+import com.mhd.push.common.mybatis.domain.PageParam;
+import com.mhd.push.common.mybatis.domain.PageResponse;
+import com.mhd.push.common.mybatis.domain.PageResultUtils;
 import com.mhd.push.common.respnsedata.BaseResponse;
 import com.mhd.push.common.respnsedata.BaseResultUtils;
-import com.mhd.push.infra.mybatis.domain.PageParam;
-import com.mhd.push.infra.mybatis.domain.PageResponse;
-import com.mhd.push.infra.mybatis.domain.PageResultUtils;
 import com.mhd.push.infra.persistence.entity.MessageTemplate;
 import com.mhd.push.adminapi.domain.dto.MessageTemplateParam;
 import com.mhd.push.adminapi.domain.dto.MessageTemplateSaveDTO;
@@ -204,7 +203,7 @@ public class MessageTemplateController extends BaseController {
             }
             file.transferTo(localFile);
         } catch (Exception e) {
-            log.error("MessageTemplateController#upload fail! e:{},params{}", Throwables.getStackTraceAsString(e), JSON.toJSONString(file));
+            log.error("MessageTemplateController#upload fail! e:{}", Throwables.getStackTraceAsString(e));
             throw new BusinessException(ErrorCodeEnum.SERVICE_ERROR);
         }
         return MapUtil.of(new String[][]{{"value", filePath}});

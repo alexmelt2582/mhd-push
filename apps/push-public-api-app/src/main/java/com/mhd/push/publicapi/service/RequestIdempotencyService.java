@@ -1,7 +1,6 @@
 package com.mhd.push.publicapi.service;
 
 import com.alibaba.fastjson2.JSON;
-import com.mhd.push.common.utils.JsonUtils;
 import com.mhd.push.common.constant.RedisConstant;
 import com.mhd.push.publicapi.domain.SendResultVO;
 import com.mhd.push.publicapi.exception.ClientBusinessException;
@@ -82,7 +81,7 @@ public class RequestIdempotencyService {
         // 1. 已有成功结果时直接返回缓存响应。
         String result = stringRedisTemplate.opsForValue().get(RedisConstant.buildIdempotencyResultKey(idempotencyKey));
         if (result != null) {
-            return JsonUtils.parseArray(result, SendResultVO.class);
+            return JSON.parseArray(result, SendResultVO.class);
         }
 
         // 2. 未命中结果时尝试获取短期锁，防止并发重复提交。

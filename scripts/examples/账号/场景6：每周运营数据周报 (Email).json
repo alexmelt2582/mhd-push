@@ -2,5 +2,5 @@
   "id": 3006,
   "name": "SendGrid邮件服务",
   "sendChannel": 40,
-  "accountConfig": "{\"provider\":\"SendGrid\",\"apiKey\":\"SG.xxxxxxxxxxxxxx.yyyyyyyyyyyyyyyy\",\"fromEmail\":\"report@company.com\",\"fromName\":\"数据中心\"}"
+  "accountConfig": "{\"host\":\"smtp.163.com\",\"port\":465,\"user\":\"zhaohaodong\",\"pass\":\"TTiWyUvsEX9m6D9V\",\"from\":\"zhaohaodong29@163.com\",\"starttlsEnable\":\"false\",\"auth\":true,\"sslEnable\":true}"
 }

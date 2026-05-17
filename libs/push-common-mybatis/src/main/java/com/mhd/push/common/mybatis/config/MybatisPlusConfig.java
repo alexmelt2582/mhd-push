@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInt
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 @EnableTransactionManagement(proxyTargetClass = true)
 @MapperScan("${mybatis-plus.mapperPackage}")
-@Configuration
+@AutoConfiguration
 public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {

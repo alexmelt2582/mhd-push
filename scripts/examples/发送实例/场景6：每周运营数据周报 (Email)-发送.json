@@ -2,9 +2,9 @@
   "code": "send",
   "templateId": 6,
   "messageParam": {
-    "receiver": "alex@example.com",
+    "receiver": "2779495512@qq.com",
     "templateParams": {
-      "companyName": "星海科技",
+      "companyName": "ss",
       "userName": "Alex",
       "startDate": "2026-04-29",
       "endDate": "2026-05-05",
@@ -13,8 +13,7 @@
       "activeUsers": "8560",
       "avgResponseTime": "183",
       "reportLink": "https://bi.example.com/report/weekly/20260505",
-      "title": "星海科技运营周报（2026-05-05）",
-      "url": "https://files.example.com/report1.pdf,https://files.example.com/report2.xlsx"
+      "title": "运营周报（2026-05-05）"
     },
     "extra": {
       "businessOwner": "MAIL01"

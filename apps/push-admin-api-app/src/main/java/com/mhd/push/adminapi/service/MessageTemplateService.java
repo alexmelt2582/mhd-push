@@ -2,7 +2,7 @@ package com.mhd.push.adminapi.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.mhd.push.infra.mybatis.domain.PageParam;
+import com.mhd.push.common.mybatis.domain.PageParam;
 import com.mhd.push.common.pipeline.BasicResultVO;
 import com.mhd.push.infra.persistence.entity.MessageTemplate;
 import com.mhd.push.adminapi.domain.dto.MessageTemplateParam;

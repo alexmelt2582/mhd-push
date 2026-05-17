@@ -4,12 +4,8 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.ttl.TransmittableThreadLocal;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mhd.push.common.constant.GlobalConstant;
-import com.mhd.push.common.utils.JsonUtils;
+import com.mhd.push.common.utils.json.JsonUtils;
 import com.mhd.push.common.utils.StringUtils;
 import com.mhd.push.common.web.filter.RepeatedlyRequestWrapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,6 +15,9 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 import java.io.BufferedReader;
 import java.util.HashSet;
@@ -54,8 +53,7 @@ public class PlusWebInvokeTimeInterceptor implements HandlerInterceptor {
                 BufferedReader reader = request.getReader();
                 jsonParam = IoUtil.read(reader);
                 if (StringUtils.isNotBlank(jsonParam)) {
-                    ObjectMapper objectMapper = JsonUtils.getObjectMapper();
-                    JsonNode rootNode = objectMapper.readTree(jsonParam);
+                    JsonNode rootNode = JsonUtils.parseTree(jsonParam);
                     removeSensitiveFields(rootNode, GlobalConstant.EXCLUDE_PROPERTIES);
                     jsonParam = rootNode.toString();
                 }
@@ -131,14 +129,14 @@ public class PlusWebInvokeTimeInterceptor implements HandlerInterceptor {
             ObjectNode objectNode = (ObjectNode) node;
             // 收集要删除的字段名（避免 ConcurrentModification）
             Set<String> fieldsToRemove = new HashSet<>();
-            objectNode.fieldNames().forEachRemaining(fieldName -> {
+            objectNode.propertyNames().forEach(fieldName -> {
                 if (ArrayUtil.contains(excludeProperties, fieldName)) {
                     fieldsToRemove.add(fieldName);
                 }
             });
             fieldsToRemove.forEach(objectNode::remove);
             // 递归处理子节点
-            objectNode.elements().forEachRemaining(child -> removeSensitiveFields(child, excludeProperties));
+            objectNode.valueStream().forEach(child -> removeSensitiveFields(child, excludeProperties));
         } else if (node.isArray()) {
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode child : arrayNode) {

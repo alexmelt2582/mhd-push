@@ -192,7 +192,7 @@ def build_template_payload(template_data: dict[str, Any]) -> dict[str, Any]:
 def query_template(admin_base_url: str, template_id: int) -> dict[str, Any]:
     """查询模板详情。"""
 
-    return http_get_json(f"{admin_base_url}/messageTemplate/query/{template_id}")
+    return http_get_json(f"{admin_base_url}/message/template/query/{template_id}")
 
 
 def upsert_template(admin_base_url: str, template_data: dict[str, Any]) -> tuple[str, int, dict[str, Any], dict[str, Any]]:
@@ -202,7 +202,7 @@ def upsert_template(admin_base_url: str, template_data: dict[str, Any]) -> tuple
     payload = build_template_payload(template_data)
 
     if template_id is None:
-        result = http_json(f"{admin_base_url}/messageTemplate/add", "POST", payload)
+        result = http_json(f"{admin_base_url}/message/template/add", "POST", payload)
         generated_template_id = result.get("data")
         if str(result.get("code")) != SUCCESS_CODE or generated_template_id is None:
             raise RuntimeError(f"模板 add 未返回可用的模板ID: {json.dumps(result, ensure_ascii=False)}")
@@ -212,10 +212,10 @@ def upsert_template(admin_base_url: str, template_data: dict[str, Any]) -> tuple
     exists = str(query_result.get("code")) == SUCCESS_CODE and query_result.get("data") is not None
     if exists:
         action = "update"
-        result = http_json(f"{admin_base_url}/messageTemplate/update", "POST", payload)
+        result = http_json(f"{admin_base_url}/message/template/update", "POST", payload)
     else:
         action = "add"
-        result = http_json(f"{admin_base_url}/messageTemplate/add", "POST", payload)
+        result = http_json(f"{admin_base_url}/message/template/add", "POST", payload)
 
     resolved_template_id = int(template_id)
     if action == "add" and result.get("data") is not None:

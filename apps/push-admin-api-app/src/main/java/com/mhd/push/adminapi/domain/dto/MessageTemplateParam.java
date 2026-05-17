@@ -1,6 +1,6 @@
 package com.mhd.push.adminapi.domain.dto;
 
-import com.mhd.push.infra.mybatis.domain.SortableParam;
+import com.mhd.push.common.mybatis.domain.SortableParam;
 import lombok.*;
 
 /**

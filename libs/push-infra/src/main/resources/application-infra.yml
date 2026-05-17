@@ -22,6 +22,7 @@ spring:
       fail_on_unknown_properties: false
 
 mybatis-plus:
+  mapperPackage: com.mhd.push.infra.persistence.mapper
   # 统一 Mapper XML 扫描位置，后续所有 XML 都应迁入 push-infra。
   mapper-locations: classpath*:/mapper/**/*.xml
   # 类型别名扫描覆盖 infra entity 多个 package 用逗号或者分号分隔

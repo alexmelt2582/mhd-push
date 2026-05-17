@@ -35,3 +35,4 @@ build/
 .DS_Store
 /logs/
 /deploy/rocketmq/rocketmq-all-5.4.0-bin-release.zip
+/deploy/docker/docker-data/redis/data/

@@ -26,6 +26,10 @@
         </dependency>
         <dependency>
             <groupId>com.mhd</groupId>
+            <artifactId>push-common-mybatis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mhd</groupId>
             <artifactId>push-engine</artifactId>
         </dependency>
         <dependency>

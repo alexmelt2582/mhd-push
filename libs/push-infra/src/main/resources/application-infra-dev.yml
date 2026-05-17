@@ -12,7 +12,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/mhd_push?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
     # 当前保留旧工程中的本地密码，仅用于开发环境；生产环境必须改为外部注入。
-    password: Z4,d.3[j
+    password: H4,d.3[j
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -33,7 +33,7 @@ spring:
   data:
     redis:
       host: 127.0.0.1
-      port: 6379
+      port: 6389
       password: ym6SLrprcE5VEd9cdU32Dw==
       database: 15
       timeout: 3000
