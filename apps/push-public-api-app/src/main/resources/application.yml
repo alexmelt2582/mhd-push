@@ -43,7 +43,7 @@ spring:
       # 引入共享基础设施配置，避免重复维护 MyBatis、Jackson、MQ 等参数。
       - optional:classpath:application-infra.yml
   main:
-    banner-mode: off
+    banner-mode: console
   mvc:
     static-path-pattern: /static/**
     format:

@@ -48,7 +48,7 @@ spring:
     # 允许循环依赖
     # allow-circular-references: true
     # 关闭 banner
-    banner-mode: off
+    banner-mode: console
   servlet:
     multipart:
       # 开启文件上传

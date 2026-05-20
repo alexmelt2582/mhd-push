@@ -24,4 +24,4 @@ spring:
       - optional:classpath:application-infra.yml
       - optional:classpath:application-engine.yml
   main:
-    banner-mode: off
+    banner-mode: console
